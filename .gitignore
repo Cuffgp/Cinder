@@ -1,0 +1,17 @@
+# Binaries
+bin/
+bin-int/
+
+# Files
+*.user
+*.log
+
+# Visual Studios
+.vs/
+**.sln
+**.vcxproj
+**.vcxproj.filters
+**.vcxproj.user
+
+buildWindows.bat
+premake5.exe
