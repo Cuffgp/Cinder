@@ -21,13 +21,12 @@ namespace Cinder {
 		m_Window->SetEventCallback(CN_BIND_EVENT_FN(OnEvent));
 
 		m_Device = CreateRef<VulkanDevice>(m_Window->GetNativeWindow());
-		//VkExtent2D extent{ m_Window->GetWidth(), m_Window->GetHeight() };
-		//m_SwapChain = CreateRef<VulkanSwapChain>(m_Device, extent);
+		m_Renderer = CreateRef<VulkanRenderer>(m_Window, m_Device);
 
 		loadModels();
 		createPipelineLayout();
-		recreateSwapChain(static_cast<uint32_t>(m_Window->GetWidth()), static_cast<uint32_t>(m_Window->GetHeight()));
-		createCommandBuffers();
+		createPipeline(m_Renderer->getSwapChainRenderPass());
+
 	}
 
 	Application::~Application()
@@ -75,7 +74,13 @@ namespace Cinder {
 					layer->OnUpdate(timestep);
 
 				m_Window->OnUpdate();
-				drawFrame();
+				if (auto commandBuffer = m_Renderer->beginFrame())
+				{
+					m_Renderer->beginSwapChainRenderPass(commandBuffer);
+					renderGameObjects(commandBuffer);
+					m_Renderer->endSwapChainRenderPass(commandBuffer);
+					m_Renderer->endFrame();
+				}
 			}
 		}
 	}
@@ -137,14 +142,13 @@ namespace Cinder {
 		}
 	}
 
-	void Application::createPipeline()
+	void Application::createPipeline(VkRenderPass renderPass)
 	{
-		CN_ASSERT(m_SwapChain, "Cannot create pipeline before swap chain");
 		CN_ASSERT(pipelineLayout, "Cannot create pipeline before pipeline layout");
 
 		PipelineConfigInfo pipelineConfig{};
 		VulkanPipeline::defaultPipelineConfigInfo(pipelineConfig);
-		pipelineConfig.renderPass = m_SwapChain->getRenderPass();
+		pipelineConfig.renderPass = renderPass;
 		pipelineConfig.pipelineLayout = pipelineLayout;
 		m_Pipeline = std::make_unique<VulkanPipeline>(
 			m_Device,
@@ -153,87 +157,14 @@ namespace Cinder {
 			pipelineConfig);
 	}
 
-	void Application::createCommandBuffers()
-	{
-		commandBuffers.resize(m_SwapChain->imageCount());
-
-		VkCommandBufferAllocateInfo allocInfo{};
-		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-		allocInfo.commandPool = m_Device->getCommandPool();
-		allocInfo.commandBufferCount = static_cast<uint32_t>(commandBuffers.size());
-
-		if (vkAllocateCommandBuffers(m_Device->device(), &allocInfo, commandBuffers.data()) !=
-			VK_SUCCESS) {
-			throw std::runtime_error("failed to allocate command buffers!");
-		}
-	}
-
-	void Application::freeCommandBuffers()
-	{
-		vkFreeCommandBuffers(m_Device->device(), m_Device->getCommandPool(),
-			static_cast<uint32_t>(commandBuffers.size()), commandBuffers.data());
-		commandBuffers.clear();
-	}
-
-	void Application::drawFrame()
-	{
-		uint32_t imageIndex;
-		auto result = m_SwapChain->acquireNextImage(&imageIndex);
-
-		if (result == VK_ERROR_OUT_OF_DATE_KHR)
-		{
-			recreateSwapChain(static_cast<uint32_t>(m_Window->GetWidth()), static_cast<uint32_t>(m_Window->GetHeight()));
-			return;
-		}
-
-		if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
-			throw std::runtime_error("failed to acquire swap chain image!");
-		}
-
-		recordCommandBuffer(imageIndex);
-		result = m_SwapChain->submitCommandBuffers(&commandBuffers[imageIndex], &imageIndex);
-
-		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
-		{
-			recreateSwapChain(static_cast<uint32_t>(m_Window->GetWidth()), static_cast<uint32_t>(m_Window->GetHeight()));
-			return;
-		}
-
-		if (result != VK_SUCCESS) {
-			throw std::runtime_error("failed to present swap chain image!");
-		}
-	}
-
-	void Application::recreateSwapChain(uint32_t width, uint32_t height)
-	{
-		VkExtent2D extent = { width, height };
-
-		vkDeviceWaitIdle(m_Device->device());
-
-		if (m_SwapChain == nullptr)
-		{
-			m_SwapChain = CreateRef<VulkanSwapChain>(m_Device, extent);
-		}
-		else
-		{
-			m_SwapChain = CreateRef<VulkanSwapChain>(m_Device, extent, std::move(m_SwapChain));
-			if (m_SwapChain->imageCount() != commandBuffers.size())
-			{
-				freeCommandBuffers();
-				createCommandBuffers();
-			}
-		}
-
-		createPipeline();
-	}
-
-	void Application::recordCommandBuffer(int imageIndex)
+	/*
+	void Application::recordCommandBuffer(VkCommandBuffer commandBuffer)
 	{
 		VkCommandBufferBeginInfo beginInfo{};
 		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
-		if (vkBeginCommandBuffer(commandBuffers[imageIndex], &beginInfo) != VK_SUCCESS) {
+		if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS)
+		{
 			throw std::runtime_error("failed to begin recording command buffer!");
 		}
 
@@ -268,7 +199,7 @@ namespace Cinder {
 		m_Model->bind(commandBuffers[imageIndex]);
 		m_Model->draw(commandBuffers[imageIndex]);
 
-		/*
+		
 		SimplePushConstantData push{};
 		//push.projection = glm::ortho(0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f);
 		//push.view = glm::rotate(glm::mat4(1.0f), time, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -280,16 +211,19 @@ namespace Cinder {
 			0,
 			sizeof(SimplePushConstantData),
 			&push);
-		*/
+		
 
 		vkCmdEndRenderPass(commandBuffers[imageIndex]);
 		if (vkEndCommandBuffer(commandBuffers[imageIndex]) != VK_SUCCESS)
 			CN_CORE_ERROR("failed to record command buffer!");
 	}
+	*/
 
 	void Application::renderGameObjects(VkCommandBuffer commandBuffer)
 	{
-
+		m_Pipeline->bind(commandBuffer);
+		m_Model->bind(commandBuffer);
+		m_Model->draw(commandBuffer);
 	}
 
 	

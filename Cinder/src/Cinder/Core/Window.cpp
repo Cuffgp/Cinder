@@ -25,9 +25,9 @@ namespace Cinder {
 		Shutdown();
 	}
 
-	Scope<Window> Window::Create(const WindowProps& props)
+	Ref<Window> Window::Create(const WindowProps& props)
 	{
-		return CreateScope<Window>(props);
+		return CreateRef<Window>(props);
 	}
 
 	void Window::Init(const WindowProps& props)

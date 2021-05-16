@@ -10,9 +10,9 @@
 #include "Cinder/Core/Timestep.h"
 
 #include "Cinder/Vulkan/VulkanDevice.h"
-#include "Cinder/Vulkan/VulkanSwapchain.h"
 #include "Cinder/Vulkan/VulkanPipeline.h"
 #include "Cinder/Vulkan/VulkanModel.h"
+#include "Cinder/Vulkan/VulkanRenderer.h"
 
 namespace Cinder {
 
@@ -38,7 +38,7 @@ namespace Cinder {
 		bool OnWindowResize(WindowResizeEvent& e);
 
 	private:
-		Scope<Window> m_Window;
+		Ref<Window> m_Window;
 		bool m_Running = true;
 		bool m_Minimized = false;
 		LayerStack m_LayerStack;
@@ -47,22 +47,17 @@ namespace Cinder {
 		static Application* s_Instance;
 
 		Ref<VulkanDevice> m_Device;
-		Ref<VulkanSwapChain> m_SwapChain;
 		Ref<VulkanPipeline> m_Pipeline;
+		Ref<VulkanRenderer> m_Renderer;
 
 		Scope<VulkanModel> m_Model;
 
 		VkPipelineLayout pipelineLayout;
-		std::vector<VkCommandBuffer> commandBuffers;
 
 		void loadModels();
 		void createPipelineLayout();
-		void createPipeline();
-		void createCommandBuffers();
-		void freeCommandBuffers();
-		void drawFrame();
-		void recreateSwapChain(uint32_t width, uint32_t height);
-		void recordCommandBuffer(int imageIndex);
+		void createPipeline(VkRenderPass renderPass);
+		//void recordCommandBuffer(int imageIndex);
 		void renderGameObjects(VkCommandBuffer commandBuffer);
 	};
 }

@@ -37,7 +37,7 @@ namespace Cinder {
 
 		GLFWwindow* GetNativeWindow() const { return m_Window; }
 
-		static Scope<Window> Create(const WindowProps& props = WindowProps());
+		static Ref<Window> Create(const WindowProps& props = WindowProps());
 
 	private:
 		void Init(const WindowProps& props);
