@@ -2,6 +2,7 @@
 
 #include "Cinder/Core/Base.h"
 #include "Cinder/Events/Event.h"
+#include <GLFW/glfw3.h>
 
 namespace Cinder {
 
@@ -12,29 +13,47 @@ namespace Cinder {
 		uint32_t Height;
 
 		WindowProps(std::string title = "Cinder Window",
-			uint32_t width = 1280, uint32_t height = 720):
+			uint32_t width = 1280, uint32_t height = 720) :
 			Title(title), Width(width), Height(height)
 		{}
 	};
 
 	class Window
 	{
+
 	public:
 		using EventCallbackFn = std::function<void(Event&)>;
 
-		virtual ~Window() {}
+		Window(const WindowProps& props);
+		~Window();
 
-		virtual void OnUpdate() = 0;
-		virtual unsigned int GetWidth() const = 0;
-		virtual unsigned int GetHeight() const = 0;
+		void OnUpdate();
+
+		unsigned int GetWidth() const { return m_Data.Width; }
+		unsigned int GetHeight() const { return m_Data.Height; }
 
 		// Window attributes
-		virtual void SetEventCallback(const EventCallbackFn& callback) = 0;
+		void SetEventCallback(const EventCallbackFn& callback) { m_Data.EventCallback = callback; }
 
-		virtual void* GetNativeWindow() const = 0;
+		GLFWwindow* GetNativeWindow() const { return m_Window; }
 
-		static Window* Create(const WindowProps& props = WindowProps());
+		static Scope<Window> Create(const WindowProps& props = WindowProps());
+
+	private:
+		void Init(const WindowProps& props);
+		void Shutdown();
+	private:
+		GLFWwindow* m_Window;
+
+		struct WindowData
+		{
+			std::string Title;
+			unsigned int Width, Height;
+
+			EventCallbackFn EventCallback;
+		};
+
+		WindowData m_Data;
 	};
-
 
 }

@@ -3,6 +3,11 @@
 
 #include "GLFW/glfw3.h"
 
+#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#include <glm/glm.hpp>
+#include <glm/gtc/constants.hpp>
+
 namespace Cinder {
 
 	Application* Application::s_Instance = nullptr;
@@ -12,8 +17,17 @@ namespace Cinder {
 		CN_CORE_ASSERT(!s_Instance, "Application already exsists!")
 		s_Instance = this;
 
-		m_Window = Scope<Window>(Window::Create());
+		m_Window = Window::Create();
 		m_Window->SetEventCallback(CN_BIND_EVENT_FN(OnEvent));
+
+		m_Device = CreateRef<VulkanDevice>(m_Window->GetNativeWindow());
+		//VkExtent2D extent{ m_Window->GetWidth(), m_Window->GetHeight() };
+		//m_SwapChain = CreateRef<VulkanSwapChain>(m_Device, extent);
+
+		loadModels();
+		createPipelineLayout();
+		recreateSwapChain(static_cast<uint32_t>(m_Window->GetWidth()), static_cast<uint32_t>(m_Window->GetHeight()));
+		createCommandBuffers();
 	}
 
 	Application::~Application()
@@ -61,6 +75,7 @@ namespace Cinder {
 					layer->OnUpdate(timestep);
 
 				m_Window->OnUpdate();
+				drawFrame();
 			}
 		}
 	}
@@ -84,6 +99,198 @@ namespace Cinder {
 		return false;
 	}
 
+	void Application::loadModels()
+	{
+		std::vector<VulkanModel::Vertex> vertices
+		{
+			{{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}},
+			{{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}},
+			{{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}},
+			{{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}}
+		};
 
+		std::vector<uint32_t> indices
+		{ 0, 1, 2, 2, 3, 0 };
 
+		m_Model = CreateScope<VulkanModel>(m_Device, vertices, indices);
+		//m_Model = CreateScope<VulkanModel>(m_Device, "assets/objects/Spot.obj");
+	}
+
+	void Application::createPipelineLayout()
+	{
+		//VkPushConstantRange pushConstantRange{};
+		//pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+		//pushConstantRange.offset = 0;
+		//pushConstantRange.size = sizeof(SimplePushConstantData);
+
+		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
+		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+		pipelineLayoutInfo.setLayoutCount = 0;
+		pipelineLayoutInfo.pSetLayouts = nullptr;
+		//pipelineLayoutInfo.pushConstantRangeCount = 1;
+		//pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
+		pipelineLayoutInfo.pushConstantRangeCount = 0;
+		pipelineLayoutInfo.pPushConstantRanges = nullptr;
+		if (vkCreatePipelineLayout(m_Device->device(), &pipelineLayoutInfo, nullptr, &pipelineLayout) !=
+			VK_SUCCESS) {
+			throw std::runtime_error("failed to create pipeline layout!");
+		}
+	}
+
+	void Application::createPipeline()
+	{
+		CN_ASSERT(m_SwapChain, "Cannot create pipeline before swap chain");
+		CN_ASSERT(pipelineLayout, "Cannot create pipeline before pipeline layout");
+
+		PipelineConfigInfo pipelineConfig{};
+		VulkanPipeline::defaultPipelineConfigInfo(pipelineConfig);
+		pipelineConfig.renderPass = m_SwapChain->getRenderPass();
+		pipelineConfig.pipelineLayout = pipelineLayout;
+		m_Pipeline = std::make_unique<VulkanPipeline>(
+			m_Device,
+			"assets/shaders/shader.vert.spv",
+			"assets/shaders/shader.frag.spv",
+			pipelineConfig);
+	}
+
+	void Application::createCommandBuffers()
+	{
+		commandBuffers.resize(m_SwapChain->imageCount());
+
+		VkCommandBufferAllocateInfo allocInfo{};
+		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+		allocInfo.commandPool = m_Device->getCommandPool();
+		allocInfo.commandBufferCount = static_cast<uint32_t>(commandBuffers.size());
+
+		if (vkAllocateCommandBuffers(m_Device->device(), &allocInfo, commandBuffers.data()) !=
+			VK_SUCCESS) {
+			throw std::runtime_error("failed to allocate command buffers!");
+		}
+	}
+
+	void Application::freeCommandBuffers()
+	{
+		vkFreeCommandBuffers(m_Device->device(), m_Device->getCommandPool(),
+			static_cast<uint32_t>(commandBuffers.size()), commandBuffers.data());
+		commandBuffers.clear();
+	}
+
+	void Application::drawFrame()
+	{
+		uint32_t imageIndex;
+		auto result = m_SwapChain->acquireNextImage(&imageIndex);
+
+		if (result == VK_ERROR_OUT_OF_DATE_KHR)
+		{
+			recreateSwapChain(static_cast<uint32_t>(m_Window->GetWidth()), static_cast<uint32_t>(m_Window->GetHeight()));
+			return;
+		}
+
+		if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
+			throw std::runtime_error("failed to acquire swap chain image!");
+		}
+
+		recordCommandBuffer(imageIndex);
+		result = m_SwapChain->submitCommandBuffers(&commandBuffers[imageIndex], &imageIndex);
+
+		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
+		{
+			recreateSwapChain(static_cast<uint32_t>(m_Window->GetWidth()), static_cast<uint32_t>(m_Window->GetHeight()));
+			return;
+		}
+
+		if (result != VK_SUCCESS) {
+			throw std::runtime_error("failed to present swap chain image!");
+		}
+	}
+
+	void Application::recreateSwapChain(uint32_t width, uint32_t height)
+	{
+		VkExtent2D extent = { width, height };
+
+		vkDeviceWaitIdle(m_Device->device());
+
+		if (m_SwapChain == nullptr)
+		{
+			m_SwapChain = CreateRef<VulkanSwapChain>(m_Device, extent);
+		}
+		else
+		{
+			m_SwapChain = CreateRef<VulkanSwapChain>(m_Device, extent, std::move(m_SwapChain));
+			if (m_SwapChain->imageCount() != commandBuffers.size())
+			{
+				freeCommandBuffers();
+				createCommandBuffers();
+			}
+		}
+
+		createPipeline();
+	}
+
+	void Application::recordCommandBuffer(int imageIndex)
+	{
+		VkCommandBufferBeginInfo beginInfo{};
+		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+
+		if (vkBeginCommandBuffer(commandBuffers[imageIndex], &beginInfo) != VK_SUCCESS) {
+			throw std::runtime_error("failed to begin recording command buffer!");
+		}
+
+		VkRenderPassBeginInfo renderPassInfo{};
+		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+		renderPassInfo.renderPass = m_SwapChain->getRenderPass();
+		renderPassInfo.framebuffer = m_SwapChain->getFrameBuffer(imageIndex);
+
+		renderPassInfo.renderArea.offset = { 0, 0 };
+		renderPassInfo.renderArea.extent = m_SwapChain->getSwapChainExtent();
+
+		std::array<VkClearValue, 2> clearValues{};
+		clearValues[0].color = { 0.1f, 0.1f, 0.1f, 1.0f };
+		clearValues[1].depthStencil = { 1.0f, 0 };
+		renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+		renderPassInfo.pClearValues = clearValues.data();
+
+		vkCmdBeginRenderPass(commandBuffers[imageIndex], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+		VkViewport viewport{};
+		viewport.x = 0.0f;
+		viewport.y = 0.0f;
+		viewport.width = static_cast<float>(m_SwapChain->getSwapChainExtent().width);
+		viewport.height = static_cast<float>(m_SwapChain->getSwapChainExtent().height);
+		viewport.minDepth = 0.0f;
+		viewport.maxDepth = 1.0f;
+		VkRect2D scissor{ {0, 0}, m_SwapChain->getSwapChainExtent() };
+		vkCmdSetViewport(commandBuffers[imageIndex], 0, 1, &viewport);
+		vkCmdSetScissor(commandBuffers[imageIndex], 0, 1, &scissor);
+
+		m_Pipeline->bind(commandBuffers[imageIndex]);
+		m_Model->bind(commandBuffers[imageIndex]);
+		m_Model->draw(commandBuffers[imageIndex]);
+
+		/*
+		SimplePushConstantData push{};
+		//push.projection = glm::ortho(0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f);
+		//push.view = glm::rotate(glm::mat4(1.0f), time, glm::vec3(0.0f, 1.0f, 0.0f));
+
+		vkCmdPushConstants(
+			commandBuffers[imageIndex],
+			pipelineLayout,
+			VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+			0,
+			sizeof(SimplePushConstantData),
+			&push);
+		*/
+
+		vkCmdEndRenderPass(commandBuffers[imageIndex]);
+		if (vkEndCommandBuffer(commandBuffers[imageIndex]) != VK_SUCCESS)
+			CN_CORE_ERROR("failed to record command buffer!");
+	}
+
+	void Application::renderGameObjects(VkCommandBuffer commandBuffer)
+	{
+
+	}
+
+	
 }

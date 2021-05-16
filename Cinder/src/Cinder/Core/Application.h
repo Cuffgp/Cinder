@@ -9,6 +9,11 @@
 
 #include "Cinder/Core/Timestep.h"
 
+#include "Cinder/Vulkan/VulkanDevice.h"
+#include "Cinder/Vulkan/VulkanSwapchain.h"
+#include "Cinder/Vulkan/VulkanPipeline.h"
+#include "Cinder/Vulkan/VulkanModel.h"
+
 namespace Cinder {
 
 	class Application 
@@ -40,5 +45,24 @@ namespace Cinder {
 		float m_LastFrameTime = 0.0f;
 	private:
 		static Application* s_Instance;
+
+		Ref<VulkanDevice> m_Device;
+		Ref<VulkanSwapChain> m_SwapChain;
+		Ref<VulkanPipeline> m_Pipeline;
+
+		Scope<VulkanModel> m_Model;
+
+		VkPipelineLayout pipelineLayout;
+		std::vector<VkCommandBuffer> commandBuffers;
+
+		void loadModels();
+		void createPipelineLayout();
+		void createPipeline();
+		void createCommandBuffers();
+		void freeCommandBuffers();
+		void drawFrame();
+		void recreateSwapChain(uint32_t width, uint32_t height);
+		void recordCommandBuffer(int imageIndex);
+		void renderGameObjects(VkCommandBuffer commandBuffer);
 	};
 }

@@ -1,5 +1,5 @@
 #include "cnpch.h"
-#include "Cinder/Core/WindowsWindow.h"
+#include "Cinder/Core/Window.h"
 
 #include "Cinder/Core/Input.h"
 
@@ -15,17 +15,22 @@ namespace Cinder {
 		CN_CORE_ERROR("GLFW Error ({0}): {1}", error, description);
 	}
 
-	WindowsWindow::WindowsWindow(const WindowProps& props)
+	Window::Window(const WindowProps& props)
 	{
 		Init(props);
 	}
 
-	WindowsWindow::~WindowsWindow()
+	Window::~Window()
 	{
 		Shutdown();
 	}
 
-	void WindowsWindow::Init(const WindowProps& props)
+	Scope<Window> Window::Create(const WindowProps& props)
+	{
+		return CreateScope<Window>(props);
+	}
+
+	void Window::Init(const WindowProps& props)
 	{
 		m_Data.Title = props.Title;
 		m_Data.Width = props.Width;
@@ -37,6 +42,8 @@ namespace Cinder {
 		int success = glfwInit();
 		CN_CORE_ASSERT(success, "Could not initialize GLFW!");
 		glfwSetErrorCallback(GLFWErrorCallback);
+
+		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 	
 		m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
 
@@ -133,13 +140,13 @@ namespace Cinder {
 		});
 	}
 
-	void WindowsWindow::Shutdown()
+	void Window::Shutdown()
 	{
 		glfwDestroyWindow(m_Window);
 		glfwTerminate();
 	}
 
-	void WindowsWindow::OnUpdate()
+	void Window::OnUpdate()
 	{
 		glfwPollEvents();
 	}
