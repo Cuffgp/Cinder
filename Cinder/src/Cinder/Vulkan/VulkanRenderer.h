@@ -30,6 +30,8 @@ namespace Cinder {
 		void beginSwapChainRenderPass(VkCommandBuffer commandBuffer);
 		void endSwapChainRenderPass(VkCommandBuffer commandBuffer);
 
+		void OnWindowResize(uint32_t width, uint32_t height);
+
 	private:
 		void createCommandBuffers();
 		void freeCommandBuffers();
@@ -37,7 +39,7 @@ namespace Cinder {
 
 		Ref<Window> m_Window;
 		Ref<VulkanDevice> m_Device;
-		Scope<VulkanSwapChain> m_SwapChain;
+		Ref<VulkanSwapChain> m_SwapChain;
 
 		std::vector<VkCommandBuffer> commandBuffers;
 

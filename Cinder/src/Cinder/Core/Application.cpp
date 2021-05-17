@@ -99,6 +99,8 @@ namespace Cinder {
 			return false;
 		}
 
+		m_Renderer->OnWindowResize(e.GetWidth(), e.GetHeight());
+
 		m_Minimized = false;
 
 		return false;

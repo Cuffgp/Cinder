@@ -31,7 +31,7 @@ namespace Cinder {
 		else
 		{
             Ref<VulkanSwapChain> oldSwapChain = std::move(m_SwapChain);
-			m_SwapChain = CreateScope<VulkanSwapChain>(m_Device, extent, std::move(m_SwapChain));
+			m_SwapChain = CreateRef<VulkanSwapChain>(m_Device, extent, oldSwapChain);
 			if (!oldSwapChain->compareSwapFormats(*m_SwapChain.get()))
 			{
                 CN_ERROR("Swap chain image(or depth) format has changed!");
@@ -68,7 +68,9 @@ namespace Cinder {
         CN_CORE_ASSERT(!isFrameStarted, "Can't call beginFrame while already in progress");
 
         auto result = m_SwapChain->acquireNextImage(&currentImageIndex);
-        if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+        if (result == VK_ERROR_OUT_OF_DATE_KHR) 
+        {
+            CN_CORE_ERROR("VK_ERROR_OUT_OF_DATE_KHR");
             recreateSwapChain();
             return nullptr;
         }
@@ -151,5 +153,10 @@ namespace Cinder {
             commandBuffer == getCurrentCommandBuffer(),
             "Can't end render pass on command buffer from a different frame");
         vkCmdEndRenderPass(commandBuffer);
+    }
+
+    void VulkanRenderer::OnWindowResize(uint32_t width, uint32_t height)
+    {
+        //recreateSwapChain();
     }
 }
