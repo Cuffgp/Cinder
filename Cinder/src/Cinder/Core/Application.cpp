@@ -27,6 +27,8 @@ namespace Cinder {
 		createPipelineLayout();
 		createPipeline(m_Renderer->getSwapChainRenderPass());
 
+		m_ImGuiLayer = new ImGuiLayer(m_Renderer, m_Window);
+		PushOverlay(m_ImGuiLayer);
 	}
 
 	Application::~Application()
@@ -78,9 +80,12 @@ namespace Cinder {
 				{
 					m_Renderer->beginSwapChainRenderPass(commandBuffer);
 					renderGameObjects(commandBuffer);
+					m_ImGuiLayer->Begin();
+					m_ImGuiLayer->End();
 					m_Renderer->endSwapChainRenderPass(commandBuffer);
 					m_Renderer->endFrame();
 				}
+
 			}
 		}
 	}

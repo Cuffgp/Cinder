@@ -9,6 +9,8 @@
 
 #include "Cinder/Core/Timestep.h"
 
+#include "Cinder/ImGui/ImGuiLayer.h"
+
 #include "Cinder/Vulkan/VulkanDevice.h"
 #include "Cinder/Vulkan/VulkanPipeline.h"
 #include "Cinder/Vulkan/VulkanModel.h"
@@ -43,6 +45,7 @@ namespace Cinder {
 		bool m_Minimized = false;
 		LayerStack m_LayerStack;
 		float m_LastFrameTime = 0.0f;
+		ImGuiLayer* m_ImGuiLayer;
 	private:
 		static Application* s_Instance;
 

@@ -32,6 +32,8 @@ namespace Cinder {
 
 		void OnWindowResize(uint32_t width, uint32_t height);
 
+		Ref<VulkanSwapChain> getSwapChain() { return m_SwapChain; }
+		Ref<VulkanDevice> getDevice() { return m_Device; }
 	private:
 		void createCommandBuffers();
 		void freeCommandBuffers();
