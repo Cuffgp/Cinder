@@ -1,6 +1,7 @@
 [submodule "Cinder/vendor/GLFW"]
 	path = Cinder/vendor/GLFW
 	url = https://github.com/glfw/glfw
+    branch = 3.3-stable
 [submodule "Cinder/vendor/glm"]
 	path = Cinder/vendor/glm
 	url = https://github.com/g-truc/glm

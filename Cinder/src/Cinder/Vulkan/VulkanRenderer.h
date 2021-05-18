@@ -13,6 +13,7 @@ namespace Cinder {
 		~VulkanRenderer();
 
 		VkRenderPass getSwapChainRenderPass() const { return m_SwapChain->getRenderPass(); }
+		VkFramebuffer getSwapChainFrameBuffer() const { return m_SwapChain->getFrameBuffer(currentImageIndex); }
 		bool isFrameInProgress() const { return isFrameStarted; }
 
 		VkCommandBuffer getCurrentCommandBuffer() const {

@@ -100,30 +100,11 @@ namespace Cinder {
 		ImGui::ShowDemoWindow();
 	}
 
-	void ImGuiLayer::End()
+	void ImGuiLayer::End(VkCommandBuffer imGuiCommandBuffer)
 	{
 		ImGui::Render();
-
-		VkCommandBuffer drawCommandBuffer = m_Renderer->getCurrentCommandBuffer();
-
-		VkClearValue clearValues[2];
-		clearValues[0].color = { {0.1f, 0.1f,0.1f, 1.0f} };
-		clearValues[1].depthStencil = { 1.0f, 0 };
-
-		uint32_t width = m_Renderer->getSwapChain()->width();
-		uint32_t height = m_Renderer->getSwapChain()->height();
-
-		VkRenderPassBeginInfo renderPassBeginInfo = {};
-		renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-		renderPassBeginInfo.pNext = nullptr;
-		renderPassBeginInfo.renderPass = m_Renderer->getSwapChainRenderPass();
-		renderPassBeginInfo.renderArea.offset.x = 0;
-		renderPassBeginInfo.renderArea.offset.y = 0;
-		renderPassBeginInfo.renderArea.extent.width = width;
-		renderPassBeginInfo.renderArea.extent.height = height;
-		renderPassBeginInfo.clearValueCount = 2; // Color + depth
-		renderPassBeginInfo.pClearValues = clearValues;
-		renderPassBeginInfo.framebuffer = swapChain.GetCurrentFramebuffer();
+		ImDrawData* main_draw_data = ImGui::GetDrawData();
+		ImGui_ImplVulkan_RenderDrawData(main_draw_data, imGuiCommandBuffer);
 	}
 
 }

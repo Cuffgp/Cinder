@@ -20,7 +20,7 @@ namespace Cinder {
 		virtual void OnEvent(Event& e) override;
 
 		void Begin();
-		void End();
+		void End(VkCommandBuffer imGuiCommandBuffer);
 
 	private:
 		Ref<VulkanRenderer> m_Renderer;

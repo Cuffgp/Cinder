@@ -81,8 +81,9 @@ namespace Cinder {
 					m_Renderer->beginSwapChainRenderPass(commandBuffer);
 					renderGameObjects(commandBuffer);
 					m_ImGuiLayer->Begin();
-					m_ImGuiLayer->End();
+					m_ImGuiLayer->End(commandBuffer);
 					m_Renderer->endSwapChainRenderPass(commandBuffer);
+
 					m_Renderer->endFrame();
 				}
 
