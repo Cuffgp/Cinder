@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Vulkan.h"
+
 namespace Cinder {
 
 	enum class ShaderDataType
@@ -26,6 +28,23 @@ namespace Cinder {
 
 		CN_CORE_ASSERT(false, "Unknown ShaderDataType!");
 		return 0;
+	}
+
+	static VkFormat VulkanDataType(ShaderDataType type)
+	{
+		switch (type)
+		{
+		case ShaderDataType::Float:    return VK_FORMAT_R32_SFLOAT;
+		case ShaderDataType::Float2:   return VK_FORMAT_R32G32_SFLOAT;
+		case ShaderDataType::Float3:   return VK_FORMAT_R32G32B32_SFLOAT;
+		case ShaderDataType::Float4:   return VK_FORMAT_R32G32B32A32_SFLOAT;
+		case ShaderDataType::Int:      return VK_FORMAT_R32_SINT;
+		case ShaderDataType::Int2:     return VK_FORMAT_R32G32_SINT;
+		case ShaderDataType::Int3:     return VK_FORMAT_R32G32B32_SINT;
+		case ShaderDataType::Int4:     return VK_FORMAT_R32G32B32A32_SINT;
+		}
+
+		CN_CORE_ASSERT(false, "Unknown VulkanDataType!");
 	}
 
 	struct BufferElement

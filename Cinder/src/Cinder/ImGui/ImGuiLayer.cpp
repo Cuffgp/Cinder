@@ -61,6 +61,16 @@ namespace Cinder {
 		ImGui::StyleColorsDark();
 		//ImGui::StyleColorsClassic();
 
+		// When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
+		ImGuiStyle& style = ImGui::GetStyle();
+		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+		{
+			style.WindowRounding = 0.0f;
+			style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+		}
+		style.Colors[ImGuiCol_WindowBg] = ImVec4(0.15f, 0.15f, 0.15f, style.Colors[ImGuiCol_WindowBg].w);
+
+
 		// Setup Platform/Renderer backends
 		ImGui_ImplGlfw_InitForVulkan(m_Window->GetNativeWindow(), true);
 		ImGui_ImplVulkan_InitInfo init_info = {};
@@ -105,6 +115,14 @@ namespace Cinder {
 		ImGui::Render();
 		ImDrawData* main_draw_data = ImGui::GetDrawData();
 		ImGui_ImplVulkan_RenderDrawData(main_draw_data, imGuiCommandBuffer);
+
+		ImGuiIO& io = ImGui::GetIO(); (void)io;
+		// Update and Render additional Platform Windows
+		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+		{
+			ImGui::UpdatePlatformWindows();
+			ImGui::RenderPlatformWindowsDefault();
+		}
 	}
 
 }

@@ -19,6 +19,7 @@ namespace Cinder {
 
 		m_Window = Window::Create();
 		m_Window->SetEventCallback(CN_BIND_EVENT_FN(OnEvent));
+		m_Window->Maximize();
 
 		m_Device = CreateRef<VulkanDevice>(m_Window->GetNativeWindow());
 		m_Renderer = CreateRef<VulkanRenderer>(m_Window, m_Device);
@@ -76,16 +77,15 @@ namespace Cinder {
 					layer->OnUpdate(timestep);
 
 				m_Window->OnUpdate();
-				if (auto commandBuffer = m_Renderer->beginFrame())
-				{
-					m_Renderer->beginSwapChainRenderPass(commandBuffer);
-					renderGameObjects(commandBuffer);
-					m_ImGuiLayer->Begin();
-					m_ImGuiLayer->End(commandBuffer);
-					m_Renderer->endSwapChainRenderPass(commandBuffer);
 
-					m_Renderer->endFrame();
-				}
+				auto commandBuffer = m_Renderer->beginFrame();
+				m_Renderer->beginSwapChainRenderPass(commandBuffer);
+				renderGameObjects(commandBuffer);
+				m_ImGuiLayer->Begin();
+				m_ImGuiLayer->End(commandBuffer);
+				m_Renderer->endSwapChainRenderPass(commandBuffer);
+
+				m_Renderer->endFrame();
 
 			}
 		}

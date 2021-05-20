@@ -71,7 +71,8 @@ namespace Cinder {
 		{
 			CN_CORE_ERROR("VK_ERROR_OUT_OF_DATE_KHR");
 			recreateSwapChain();
-			return nullptr;
+			beginFrame();
+			//return nullptr;
 		}
 
 		if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
