@@ -1,6 +1,5 @@
 #include "cnpch.h"
 #include "VulkanPipeline.h"
-#include "VulkanModel.h"
 
 namespace Cinder {
 
@@ -10,6 +9,9 @@ namespace Cinder {
 		const PipelineConfigInfo& configInfo)
 	{
 		m_VulkanDevice = device;
+		// to do: move this into constructor
+		m_Layout = { {ShaderDataType::Float3, "position"},
+					 {ShaderDataType::Float3, "colour"} };
 		createGraphicsPipeline(vertFilepath, fragFilepath, configInfo);
 	}
 
@@ -71,8 +73,8 @@ namespace Cinder {
 		shaderStages[1].pNext = nullptr;
 		shaderStages[1].pSpecializationInfo = nullptr;
 
-		auto bindingDescriptions = VulkanModel::Vertex::getBindingDescriptions();
-		auto attributeDescriptions = VulkanModel::Vertex::getAttributeDescriptions();
+		auto bindingDescriptions = getBindingDescriptions(m_Layout);
+		auto attributeDescriptions = getAttributeDescriptions(m_Layout);
 
 		VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
 		vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
@@ -204,5 +206,30 @@ namespace Cinder {
 		configInfo.dynamicStateInfo.pDynamicStates = configInfo.dynamicStateEnables.data();
 		configInfo.dynamicStateInfo.dynamicStateCount = static_cast<uint32_t>(configInfo.dynamicStateEnables.size());
 		configInfo.dynamicStateInfo.flags = 0;
+	}
+
+	std::vector<VkVertexInputBindingDescription> VulkanPipeline::getBindingDescriptions(VertexBufferLayout layout)
+	{
+		std::vector<VkVertexInputBindingDescription> bindingDescriptions(1);
+		bindingDescriptions[0].binding = 0;
+		bindingDescriptions[0].stride = layout.GetStride();
+		bindingDescriptions[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+		return bindingDescriptions;
+	}
+
+	std::vector<VkVertexInputAttributeDescription> VulkanPipeline::getAttributeDescriptions(VertexBufferLayout layout)
+	{
+		std::vector<VkVertexInputAttributeDescription> attributeDescriptions(layout.GetElementCount());
+
+		uint32_t location = 0;
+		for (auto element : layout)
+		{
+			attributeDescriptions[location].binding = 0;
+			attributeDescriptions[location].location = location;
+			attributeDescriptions[location].format = ShaderDataTypeToVulkan(element.Type);
+			attributeDescriptions[location].offset = element.Offset;
+			location++;
+		}
+		return attributeDescriptions;
 	}
 }

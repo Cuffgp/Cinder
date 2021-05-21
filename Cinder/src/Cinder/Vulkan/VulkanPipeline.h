@@ -3,6 +3,7 @@
 #include "VulkanDevice.h"
 
 #include "Cinder/Core/Base.h"
+#include "VulkanVertexBuffer.h"
 
 namespace Cinder {
 
@@ -50,7 +51,11 @@ namespace Cinder {
 			const PipelineConfigInfo& configInfo);
 		void createShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule);
 
+		std::vector<VkVertexInputBindingDescription> getBindingDescriptions(VertexBufferLayout layout);
+		std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions(VertexBufferLayout layout);
+
 		Ref<VulkanDevice> m_VulkanDevice;
+		VertexBufferLayout m_Layout;
 		VkPipeline graphicsPipeline;
 		VkShaderModule vertShaderModule;
 		VkShaderModule fragShaderModule;
