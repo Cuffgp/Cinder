@@ -25,9 +25,9 @@ namespace Cinder {
 			static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions();
 		};
 
-		VulkanModel(Ref<VulkanDevice> device, const std::vector<Vertex>& vertices,
+		VulkanModel(const std::vector<Vertex>& vertices,
 			const std::vector<uint32_t>& indices);
-		VulkanModel(Ref<VulkanDevice> device, const std::string& objFilepath);
+		VulkanModel(const std::string& objFilepath);
 		~VulkanModel();
 
 		VulkanModel(const VulkanModel&) = delete;

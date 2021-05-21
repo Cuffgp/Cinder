@@ -1,11 +1,12 @@
 #include "cnpch.h"
 #include "VulkanRenderer.h"
+#include "Cinder/Core/Application.h"
 
 namespace Cinder {
 
-	VulkanRenderer::VulkanRenderer(Ref<Window> window, Ref<VulkanDevice> device)
-		:m_Window(window), m_Device(device)
+	VulkanRenderer::VulkanRenderer()
 	{
+		m_Device = Application::Get().GetVulkanDevice();
 		recreateSwapChain();
 		createCommandBuffers();
 	}
@@ -17,8 +18,8 @@ namespace Cinder {
 
 	void VulkanRenderer::recreateSwapChain()
 	{
-		auto width = m_Window->GetWidth();
-		auto height = m_Window->GetHeight();
+		auto width = Application::Get().GetWindow().GetWidth();
+		auto height = Application::Get().GetWindow().GetHeight();
 
 		VkExtent2D extent = { width, height };
 

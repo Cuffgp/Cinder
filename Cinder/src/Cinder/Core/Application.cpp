@@ -22,7 +22,7 @@ namespace Cinder {
 		m_Window->Maximize();
 
 		m_Device = CreateRef<VulkanDevice>(m_Window->GetNativeWindow());
-		m_Renderer = CreateRef<VulkanRenderer>(m_Window, m_Device);
+		m_Renderer = CreateRef<VulkanRenderer>();
 
 		loadModels();
 		createPipelineLayout();
@@ -125,8 +125,8 @@ namespace Cinder {
 		std::vector<uint32_t> indices
 		{ 0, 1, 2, 2, 3, 0 };
 
-		m_Model = CreateScope<VulkanModel>(m_Device, vertices, indices);
-		//m_Model = CreateScope<VulkanModel>(m_Device, "assets/objects/Spot.obj");
+		m_Model = CreateScope<VulkanModel>(vertices, indices);
+		//m_Model = CreateScope<VulkanModel>("assets/objects/Spot.obj");
 	}
 
 	void Application::createPipelineLayout()
@@ -159,7 +159,6 @@ namespace Cinder {
 		pipelineConfig.renderPass = renderPass;
 		pipelineConfig.pipelineLayout = pipelineLayout;
 		m_Pipeline = std::make_unique<VulkanPipeline>(
-			m_Device,
 			"assets/shaders/shader.vert.spv",
 			"assets/shaders/shader.frag.spv",
 			pipelineConfig);

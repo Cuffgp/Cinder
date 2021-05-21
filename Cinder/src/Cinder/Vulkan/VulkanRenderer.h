@@ -9,7 +9,7 @@ namespace Cinder {
 	class VulkanRenderer
 	{
 	public:
-		VulkanRenderer(Ref<Window>, Ref<VulkanDevice>);
+		VulkanRenderer();
 		~VulkanRenderer();
 
 		VkRenderPass getSwapChainRenderPass() const { return m_SwapChain->getRenderPass(); }
@@ -39,7 +39,6 @@ namespace Cinder {
 		void freeCommandBuffers();
 		void recreateSwapChain();
 
-		Ref<Window> m_Window;
 		Ref<VulkanDevice> m_Device;
 		Ref<VulkanSwapChain> m_SwapChain;
 

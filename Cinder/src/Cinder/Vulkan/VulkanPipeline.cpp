@@ -1,14 +1,16 @@
 #include "cnpch.h"
 #include "VulkanPipeline.h"
 
+#include "Cinder/Core/Application.h"
+
 namespace Cinder {
 
-	VulkanPipeline::VulkanPipeline(Ref<VulkanDevice> device,
+	VulkanPipeline::VulkanPipeline(
 		const std::string& vertFilepath,
 		const std::string& fragFilepath,
 		const PipelineConfigInfo& configInfo)
 	{
-		m_VulkanDevice = device;
+		m_VulkanDevice = Application::Get().GetVulkanDevice();
 		// to do: move this into constructor
 		m_Layout = {
 			{ShaderDataType::Float3, "position"},

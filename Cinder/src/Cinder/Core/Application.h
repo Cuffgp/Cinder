@@ -32,6 +32,7 @@ namespace Cinder {
 		void PushOverlay(Layer* layer);
 
 		inline Window& GetWindow() { return *m_Window; }
+		inline Ref<VulkanDevice> GetVulkanDevice() { return m_Device; }
 		inline static Application& Get() { return *s_Instance; }
 
 	private:

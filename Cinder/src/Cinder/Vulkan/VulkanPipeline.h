@@ -29,7 +29,7 @@ namespace Cinder {
 	class VulkanPipeline 
 	{
 	public:
-		VulkanPipeline(Ref<VulkanDevice> device,
+		VulkanPipeline(
 			const std::string& vertFilepath,
 			const std::string& fragFilepath,
 			const PipelineConfigInfo& configInfo);
