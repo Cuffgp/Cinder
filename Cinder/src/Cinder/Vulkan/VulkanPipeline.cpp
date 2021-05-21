@@ -10,8 +10,10 @@ namespace Cinder {
 	{
 		m_VulkanDevice = device;
 		// to do: move this into constructor
-		m_Layout = { {ShaderDataType::Float3, "position"},
-					 {ShaderDataType::Float3, "colour"} };
+		m_Layout = {
+			{ShaderDataType::Float3, "position"},
+			{ShaderDataType::Float3, "colour"} 
+		};
 		createGraphicsPipeline(vertFilepath, fragFilepath, configInfo);
 	}
 
