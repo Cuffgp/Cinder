@@ -1,6 +1,9 @@
 #pragma once
 
+#include "Cinder/Core/Buffer.h"
+
 #include "Vulkan.h"
+
 
 namespace Cinder {
 
@@ -123,10 +126,14 @@ namespace Cinder {
 	class VertexBuffer
 	{
 	public:
-		VertexBuffer();
+		VertexBuffer(void* data, uint32_t size);
 		~VertexBuffer();
 	private:
+		Buffer m_LocalData;
+		uint32_t m_Size;
 
+		VkBuffer vertexBuffer;
+		VkDeviceMemory vertexBufferMemory;
 	};
 
 }
