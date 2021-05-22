@@ -15,6 +15,7 @@
 #include "Cinder/Vulkan/VulkanPipeline.h"
 #include "Cinder/Vulkan/VulkanModel.h"
 #include "Cinder/Vulkan/VulkanRenderer.h"
+#include "Cinder/Vulkan/VulkanShader.h"
 
 namespace Cinder {
 
@@ -51,8 +52,9 @@ namespace Cinder {
 		static Application* s_Instance;
 
 		Ref<VulkanDevice> m_Device;
-		Ref<VulkanPipeline> m_Pipeline;
 		Ref<VulkanRenderer> m_Renderer;
+		Ref<Shader> m_Shader;
+		Ref<VulkanPipeline> m_Pipeline;
 
 		Scope<VulkanModel> m_Model;
 

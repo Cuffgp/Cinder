@@ -1,6 +1,6 @@
 #include "cnpch.h"
 #include "VulkanShader.h"
-#include "CInder/Core/Application.h"
+#include "Cinder/Core/Application.h"
 
 namespace Cinder {
 
@@ -9,7 +9,9 @@ namespace Cinder {
 		auto vertCode = readFile(vertPath);
 		auto fragCode = readFile(fragPath);
 
+		CN_CORE_INFO("VertexShader");
 		createShaderModule(vertCode, &m_VertShaderModule);
+		CN_CORE_INFO("FragmentShader");
 		createShaderModule(fragCode, &m_FragShaderModule);
 
 		m_ShaderStages.resize(2);
@@ -39,19 +41,21 @@ namespace Cinder {
 
 	std::vector<uint32_t> Shader::readFile(const std::string& filepath)
 	{
-		FILE* f = fopen(filepath.c_str(), "rb");
-		auto out = std::vector<uint32_t>();
+		std::ifstream file{ filepath, std::ios::ate | std::ios::binary };
 
-		if (f)
-		{
-			fseek(f, 0, SEEK_END);
-			uint64_t size = ftell(f);
-			fseek(f, 0, SEEK_SET);
-			out.resize(size / sizeof(uint32_t));
-			fread(out.data(), sizeof(uint32_t), out.size(), f);
-			fclose(f);
-		}
+		if (!file.is_open())
+			CN_CORE_ERROR("failed to open file: " + filepath);
 
+		size_t fileSize = static_cast<size_t>(file.tellg());
+		std::vector<char> buffer(fileSize);
+		std::vector<uint32_t> out(fileSize / sizeof(uint32_t));
+
+		file.seekg(0);
+		file.read(buffer.data(), fileSize);
+
+		file.close();
+
+		memcpy(out.data(), buffer.data(), fileSize);
 		return out;
 	}
 
@@ -59,8 +63,8 @@ namespace Cinder {
 	{
 		VkShaderModuleCreateInfo createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-		createInfo.codeSize = code.size();
-		createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
+		createInfo.codeSize = code.size()*sizeof(uint32_t);
+		createInfo.pCode = code.data();
 
 		if (vkCreateShaderModule(Application::Get().GetVulkanDevice()->device(), &createInfo, nullptr, shaderModule) != VK_SUCCESS)
 			CN_CORE_ERROR("failed to create shader module");

@@ -23,6 +23,7 @@ namespace Cinder {
 
 		m_Device = CreateRef<VulkanDevice>(m_Window->GetNativeWindow());
 		m_Renderer = CreateRef<VulkanRenderer>();
+		m_Shader = CreateRef<Shader>("assets/shaders/shader.vert.spv", "assets/shaders/shader.frag.spv");
 
 		loadModels();
 		createPipelineLayout();
@@ -159,8 +160,7 @@ namespace Cinder {
 		pipelineConfig.renderPass = renderPass;
 		pipelineConfig.pipelineLayout = pipelineLayout;
 		m_Pipeline = std::make_unique<VulkanPipeline>(
-			"assets/shaders/shader.vert.spv",
-			"assets/shaders/shader.frag.spv",
+			m_Shader,
 			pipelineConfig);
 	}
 

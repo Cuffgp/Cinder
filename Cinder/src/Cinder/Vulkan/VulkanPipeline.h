@@ -4,6 +4,7 @@
 
 #include "Cinder/Core/Base.h"
 #include "VulkanVertexBuffer.h"
+#include "VulkanShader.h"
 
 namespace Cinder {
 
@@ -30,8 +31,7 @@ namespace Cinder {
 	{
 	public:
 		VulkanPipeline(
-			const std::string& vertFilepath,
-			const std::string& fragFilepath,
+			Ref<Shader> shader,
 			const PipelineConfigInfo& configInfo);
 		~VulkanPipeline();
 
@@ -46,8 +46,7 @@ namespace Cinder {
 		static std::vector<char> readFile(const std::string& filepath);
 
 		void createGraphicsPipeline(
-			const std::string& vertFilepath,
-			const std::string& fragFilepath,
+			Ref<Shader> shader,
 			const PipelineConfigInfo& configInfo);
 		void createShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule);
 
@@ -57,8 +56,6 @@ namespace Cinder {
 		Ref<VulkanDevice> m_VulkanDevice;
 		VertexBufferLayout m_Layout;
 		VkPipeline graphicsPipeline;
-		VkShaderModule vertShaderModule;
-		VkShaderModule fragShaderModule;
 	};
 
 }

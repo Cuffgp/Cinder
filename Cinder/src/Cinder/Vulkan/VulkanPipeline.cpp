@@ -6,8 +6,7 @@
 namespace Cinder {
 
 	VulkanPipeline::VulkanPipeline(
-		const std::string& vertFilepath,
-		const std::string& fragFilepath,
+		Ref<Shader> shader,
 		const PipelineConfigInfo& configInfo)
 	{
 		m_VulkanDevice = Application::Get().GetVulkanDevice();
@@ -16,13 +15,11 @@ namespace Cinder {
 			{ShaderDataType::Float3, "position"},
 			{ShaderDataType::Float3, "colour"} 
 		};
-		createGraphicsPipeline(vertFilepath, fragFilepath, configInfo);
+		createGraphicsPipeline(shader, configInfo);
 	}
 
 	VulkanPipeline::~VulkanPipeline()
 	{
-		vkDestroyShaderModule(m_VulkanDevice->device(), vertShaderModule, nullptr);
-		vkDestroyShaderModule(m_VulkanDevice->device(), fragShaderModule, nullptr);
 		vkDestroyPipeline(m_VulkanDevice->device(), graphicsPipeline, nullptr);
 	}
 
@@ -44,8 +41,7 @@ namespace Cinder {
 	}
 
 	void VulkanPipeline::createGraphicsPipeline(
-		const std::string& vertFilepath,
-		const std::string& fragFilepath,
+		Ref<Shader> shader,
 		const PipelineConfigInfo& configInfo)
 	{
 		assert(
@@ -55,27 +51,7 @@ namespace Cinder {
 			configInfo.renderPass != nullptr &&
 			"Cannot create graphics pipeline: no renderPass provided in config info");
 
-		auto vertCode = readFile(vertFilepath);
-		auto fragCode = readFile(fragFilepath);
-
-		createShaderModule(vertCode, &vertShaderModule);
-		createShaderModule(fragCode, &fragShaderModule);
-
-		VkPipelineShaderStageCreateInfo shaderStages[2];
-		shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-		shaderStages[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
-		shaderStages[0].module = vertShaderModule;
-		shaderStages[0].pName = "main";
-		shaderStages[0].flags = 0;
-		shaderStages[0].pNext = nullptr;
-		shaderStages[0].pSpecializationInfo = nullptr;
-		shaderStages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-		shaderStages[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-		shaderStages[1].module = fragShaderModule;
-		shaderStages[1].pName = "main";
-		shaderStages[1].flags = 0;
-		shaderStages[1].pNext = nullptr;
-		shaderStages[1].pSpecializationInfo = nullptr;
+		auto shaderStages = shader->getShaderStages();
 
 		auto bindingDescriptions = getBindingDescriptions(m_Layout);
 		auto attributeDescriptions = getAttributeDescriptions(m_Layout);
@@ -90,7 +66,7 @@ namespace Cinder {
 		VkGraphicsPipelineCreateInfo pipelineInfo = {};
 		pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
 		pipelineInfo.stageCount = 2;
-		pipelineInfo.pStages = shaderStages;
+		pipelineInfo.pStages = shaderStages.data();
 		pipelineInfo.pVertexInputState = &vertexInputInfo;
 		pipelineInfo.pInputAssemblyState = &configInfo.inputAssemblyInfo;
 		pipelineInfo.pViewportState = &configInfo.viewportInfo;
@@ -118,10 +94,6 @@ namespace Cinder {
 			throw std::runtime_error("failed to create graphics pipeline!");
 		}
 
-		vkDestroyShaderModule(m_VulkanDevice->device(), fragShaderModule, nullptr);
-		vkDestroyShaderModule(m_VulkanDevice->device(), vertShaderModule, nullptr);
-		fragShaderModule = VK_NULL_HANDLE;
-		vertShaderModule = VK_NULL_HANDLE;
 	}
 
 	void VulkanPipeline::createShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule) 
