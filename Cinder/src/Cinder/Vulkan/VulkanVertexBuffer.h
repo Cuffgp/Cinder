@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Cinder/Core/Buffer.h"
+#include "VulkanAllocator.h"
 
 #include "Vulkan.h"
 
@@ -129,11 +130,11 @@ namespace Cinder {
 		VertexBuffer(void* data, uint32_t size);
 		~VertexBuffer();
 	private:
+		uint32_t m_Size = 0;
 		Buffer m_LocalData;
-		uint32_t m_Size;
 
-		VkBuffer vertexBuffer;
-		VkDeviceMemory vertexBufferMemory;
+		VkBuffer m_VulkanBuffer = nullptr;
+		VmaAllocation m_Allocation;
 	};
 
 }

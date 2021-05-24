@@ -1,18 +1,17 @@
 #include "cnpch.h"
-#include "VulkanVertexBuffer.h"
+#include "VulkanIndexBuffer.h"
 #include "Cinder/Core/Application.h"
 
 namespace Cinder {
 
-	VertexBuffer::VertexBuffer(void* data, uint32_t size) :
-		m_Size(size)
+	IndexBuffer::IndexBuffer(void* data, uint32_t size)
 	{
 		auto device = Application::Get().GetVulkanDevice();
 
 		VkBufferCreateInfo bufferInfo{};
 		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 		bufferInfo.size = m_Size;
-		bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+		bufferInfo.usage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
 		bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
 		m_LocalData = Buffer::Copy(data, size);
@@ -24,7 +23,7 @@ namespace Cinder {
 		VulkanAllocator::UnmapMemory(m_Allocation);
 	}
 
-	VertexBuffer::~VertexBuffer()
+	IndexBuffer::~IndexBuffer()
 	{
 		VulkanAllocator::DestroyBuffer(m_VulkanBuffer, m_Allocation);
 	}

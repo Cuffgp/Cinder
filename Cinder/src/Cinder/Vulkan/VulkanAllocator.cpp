@@ -31,10 +31,38 @@ namespace Cinder {
 
 		VmaAllocation allocation;
 		vmaCreateBuffer(s_Allocator, &bufferCreateInfo, &allocCreateInfo, &outBuffer, &allocation, nullptr);
+
+		return allocation;
 	}
 
 	VmaAllocation VulkanAllocator::AllocateImage(VkImageCreateInfo imageCreateInfo, VkImage& outImage)
 	{
+		VmaAllocationCreateInfo allocCreateInfo = {};
+		allocCreateInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
 
+		VmaAllocation allocation;
+		vmaCreateImage(s_Allocator, &imageCreateInfo, &allocCreateInfo, &outImage, &allocation, nullptr);
+
+		return allocation;
+	}
+
+	void VulkanAllocator::DestroyBuffer(VkBuffer buffer, VmaAllocation allocation)
+	{
+		vmaDestroyBuffer(s_Allocator, buffer, allocation);
+	}
+
+	void VulkanAllocator::DestroyImage(VkImage image, VmaAllocation allocation)
+	{
+		vmaDestroyImage(s_Allocator, image, allocation);
+	}
+
+	void VulkanAllocator::MapMemory(VmaAllocation allocation, void* data)
+	{
+		vmaMapMemory(s_Allocator, allocation, &data);
+	}
+
+	void VulkanAllocator::UnmapMemory(VmaAllocation allocation)
+	{
+		vmaUnmapMemory(s_Allocator, allocation);
 	}
 }

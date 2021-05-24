@@ -1,11 +1,14 @@
 #include "cnpch.h"
 #include "VulkanRenderer.h"
+#include "VulkanAllocator.h"
 #include "Cinder/Core/Application.h"
 
 namespace Cinder {
 
 	VulkanRenderer::VulkanRenderer()
 	{
+		VulkanAllocator::Init();
+
 		m_Device = Application::Get().GetVulkanDevice();
 		recreateSwapChain();
 		createCommandBuffers();
@@ -13,6 +16,8 @@ namespace Cinder {
 
 	VulkanRenderer::~VulkanRenderer()
 	{
+		VulkanAllocator::Shutdown();
+
 		freeCommandBuffers();
 	}
 

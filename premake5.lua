@@ -51,6 +51,8 @@ project "Cinder"
 		"%{prj.name}/src/**.c",
 		"%{prj.name}/src/**.hpp", 
 		"%{prj.name}/src/**.cpp",
+        "%{prj.name}/vendor/VulkanMemoryAllocator/**.h",
+		"%{prj.name}/vendor/VulkanMemoryAllocator/**.cpp"
 	}
 
 	includedirs
