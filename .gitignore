@@ -5,6 +5,7 @@ bin-int/
 # Files
 *.user
 *.log
+*.ini
 
 # Visual Studios
 .vs/

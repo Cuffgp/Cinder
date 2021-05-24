@@ -1,18 +1,18 @@
 workspace "Cinder"
 	architecture "x64"
 	startproject "Cinder"
-	
+
 	configurations 
 	{
 		"Debug",
 		"Release"
 	}
-	
+
 	flags
 	{
 		"MultiProcessorCompile"
 	}
-	
+
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 -- Include directories relative to root folder (solution directory)
@@ -23,6 +23,7 @@ IncludeDir["Vulkan"] = "C:/VulkanSDK/1.2.170.0/Include"
 IncludeDir["glm"] = "Cinder/vendor/glm"
 IncludeDir["tinyobjloader"] = "Cinder/vendor/tinyobjloader"
 IncludeDir["stb_image"] = "Cinder/vendor/stb_image"
+IncludeDir["VulkanMemoryAllocator"] = "Cinder/vendor/VulkanMemoryAllocator"
 
 LibraryDir = {}
 LibraryDir["Vulkan"] = "C:/VulkanSDK/1.2.170.0/Lib/vulkan-1.lib"
@@ -51,7 +52,7 @@ project "Cinder"
 		"%{prj.name}/src/**.hpp", 
 		"%{prj.name}/src/**.cpp",
 	}
-	
+
 	includedirs
 	{
 		"%{prj.name}/src",
@@ -61,18 +62,16 @@ project "Cinder"
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.tinyobjloader}",
 		"%{IncludeDir.stb_image}",
+		"%{IncludeDir.VulkanMemoryAllocator}",
 		"%{prj.name}/vendor"
 	}
-	
+
 	links
 	{
 		"GLFW",
 		"ImGui",
 		"%{LibraryDir.Vulkan}"
 	}
-	
-	--postbuildcommands { "call %{prj.name}/assets/compile.bat" }
-	
 
 	filter "configurations:Debug"
 		defines { "DEBUG" }
