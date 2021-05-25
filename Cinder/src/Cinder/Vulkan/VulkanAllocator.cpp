@@ -11,7 +11,7 @@ namespace Cinder {
 		auto device = Application::Get().GetVulkanDevice();
 
 		VmaAllocatorCreateInfo allocatorInfo = {};
-		allocatorInfo.vulkanApiVersion = VK_API_VERSION_1_2;
+		allocatorInfo.vulkanApiVersion = VK_API_VERSION_1_0;
 		allocatorInfo.physicalDevice = device->getPhysicalDevice();
 		allocatorInfo.device = device->device();
 		allocatorInfo.instance = device->getInstance();
@@ -56,9 +56,11 @@ namespace Cinder {
 		vmaDestroyImage(s_Allocator, image, allocation);
 	}
 
-	void VulkanAllocator::MapMemory(VmaAllocation allocation, void* data)
+	void* VulkanAllocator::MapMemory(VmaAllocation allocation)
 	{
-		vmaMapMemory(s_Allocator, allocation, &data);
+		void* mappedMemory;
+		vmaMapMemory(s_Allocator, allocation, (void**)&mappedMemory);
+		return mappedMemory;
 	}
 
 	void VulkanAllocator::UnmapMemory(VmaAllocation allocation)

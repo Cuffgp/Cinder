@@ -31,6 +31,21 @@ namespace Cinder {
 
 		m_ImGuiLayer = new ImGuiLayer(m_Renderer, m_Window);
 		PushOverlay(m_ImGuiLayer);
+
+		float vertexData[] = {
+			-0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
+			 0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
+			 0.5f,  0.5f, 0.0f, 0.0f, 0.0f, 1.0f,
+			-0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 1.0f
+		};
+
+		uint32_t indexData[] = {
+			0, 1, 2, 2, 3, 0
+		};
+
+		m_Vertex = CreateRef<VertexBuffer>(vertexData, sizeof(vertexData));
+		m_Index = CreateRef<IndexBuffer>(indexData, sizeof(indexData));
+
 	}
 
 	Application::~Application()
@@ -81,7 +96,8 @@ namespace Cinder {
 
 				auto commandBuffer = m_Renderer->beginFrame();
 				m_Renderer->beginSwapChainRenderPass(commandBuffer);
-				renderGameObjects(commandBuffer);
+				//renderGameObjects(commandBuffer);
+				drawIndexed(commandBuffer);
 				m_ImGuiLayer->Begin();
 				m_ImGuiLayer->End(commandBuffer);
 				m_Renderer->endSwapChainRenderPass(commandBuffer);
@@ -169,6 +185,19 @@ namespace Cinder {
 		m_Pipeline->bind(commandBuffer);
 		m_Model->bind(commandBuffer);
 		m_Model->draw(commandBuffer);
+	}
+
+	void Application::drawIndexed(VkCommandBuffer commandBuffer)
+	{
+		m_Pipeline->bind(commandBuffer);
+
+		VkBuffer vertexBuffers[] = { m_Vertex->GetVulkanBuffer() };
+		VkDeviceSize offsets[] = { 0 };
+		vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+		vkCmdBindIndexBuffer(commandBuffer, m_Index->GetVulkanBuffer(), 0, VK_INDEX_TYPE_UINT32);
+
+		vkCmdDrawIndexed(commandBuffer, m_Index->GetIndexCount(), 1, 0, 0, 0);
+
 	}
 
 	

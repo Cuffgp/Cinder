@@ -4,7 +4,8 @@
 
 namespace Cinder {
 
-	IndexBuffer::IndexBuffer(void* data, uint32_t size)
+	IndexBuffer::IndexBuffer(void* data, uint32_t size) :
+		m_Size(size)
 	{
 		auto device = Application::Get().GetVulkanDevice();
 
@@ -15,10 +16,10 @@ namespace Cinder {
 		bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
 		m_LocalData = Buffer::Copy(data, size);
+		m_IndexCount = (uint32_t)(size / sizeof(uint32_t));
 		m_Allocation = VulkanAllocator::AllocateBuffer(bufferInfo, m_VulkanBuffer);
 
-		void* dst;
-		VulkanAllocator::MapMemory(m_Allocation, dst);
+		void* dst = VulkanAllocator::MapMemory(m_Allocation);
 		memcpy(dst, m_LocalData.Data, m_Size);
 		VulkanAllocator::UnmapMemory(m_Allocation);
 	}

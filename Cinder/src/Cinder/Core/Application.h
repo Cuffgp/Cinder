@@ -17,6 +17,9 @@
 #include "Cinder/Vulkan/VulkanRenderer.h"
 #include "Cinder/Vulkan/VulkanShader.h"
 
+#include "Cinder/Vulkan/VulkanIndexBuffer.h"
+#include "Cinder/Vulkan/VulkanVertexBuffer.h"
+
 namespace Cinder {
 
 	class Application 
@@ -56,6 +59,9 @@ namespace Cinder {
 		Ref<Shader> m_Shader;
 		Ref<VulkanPipeline> m_Pipeline;
 
+		Ref<VertexBuffer> m_Vertex;
+		Ref<IndexBuffer> m_Index;
+
 		Scope<VulkanModel> m_Model;
 
 		VkPipelineLayout pipelineLayout;
@@ -63,7 +69,9 @@ namespace Cinder {
 		void loadModels();
 		void createPipelineLayout();
 		void createPipeline(VkRenderPass renderPass);
-		//void recordCommandBuffer(int imageIndex);
+
 		void renderGameObjects(VkCommandBuffer commandBuffer);
+
+		void drawIndexed(VkCommandBuffer commandBuffer);
 	};
 }

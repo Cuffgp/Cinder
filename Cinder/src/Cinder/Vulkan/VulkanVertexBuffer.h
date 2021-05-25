@@ -129,6 +129,8 @@ namespace Cinder {
 	public:
 		VertexBuffer(void* data, uint32_t size);
 		~VertexBuffer();
+
+		VkBuffer GetVulkanBuffer() { return m_VulkanBuffer; }
 	private:
 		uint32_t m_Size = 0;
 		Buffer m_LocalData;
