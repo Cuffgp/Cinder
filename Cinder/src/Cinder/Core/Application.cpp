@@ -25,7 +25,8 @@ namespace Cinder {
 		m_Renderer = CreateRef<VulkanRenderer>();
 		m_Shader = CreateRef<Shader>("assets/shaders/shader.vert.spv", "assets/shaders/shader.frag.spv");
 
-		loadModels();
+		m_Model = CreateRef<Model>("assets/objects/Spot.obj");
+
 		createPipelineLayout();
 		createPipeline(m_Renderer->getSwapChainRenderPass());
 
@@ -96,8 +97,8 @@ namespace Cinder {
 
 				auto commandBuffer = m_Renderer->beginFrame();
 				m_Renderer->beginSwapChainRenderPass(commandBuffer);
-				//renderGameObjects(commandBuffer);
-				drawIndexed(commandBuffer);
+				renderGameObjects(commandBuffer);
+				//drawIndexed(commandBuffer);
 				m_ImGuiLayer->Begin();
 				m_ImGuiLayer->End(commandBuffer);
 				m_Renderer->endSwapChainRenderPass(commandBuffer);
@@ -127,23 +128,6 @@ namespace Cinder {
 		m_Minimized = false;
 
 		return false;
-	}
-
-	void Application::loadModels()
-	{
-		std::vector<VulkanModel::Vertex> vertices
-		{
-			{{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}},
-			{{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}},
-			{{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}},
-			{{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}}
-		};
-
-		std::vector<uint32_t> indices
-		{ 0, 1, 2, 2, 3, 0 };
-
-		m_Model = CreateScope<VulkanModel>(vertices, indices);
-		//m_Model = CreateScope<VulkanModel>("assets/objects/Spot.obj");
 	}
 
 	void Application::createPipelineLayout()

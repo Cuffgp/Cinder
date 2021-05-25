@@ -20,6 +20,8 @@
 #include "Cinder/Vulkan/VulkanIndexBuffer.h"
 #include "Cinder/Vulkan/VulkanVertexBuffer.h"
 
+#include "Cinder/Renderer/Model.h"
+
 namespace Cinder {
 
 	class Application 
@@ -62,11 +64,10 @@ namespace Cinder {
 		Ref<VertexBuffer> m_Vertex;
 		Ref<IndexBuffer> m_Index;
 
-		Scope<VulkanModel> m_Model;
+		Ref<Model> m_Model;
 
 		VkPipelineLayout pipelineLayout;
 
-		void loadModels();
 		void createPipelineLayout();
 		void createPipeline(VkRenderPass renderPass);
 
