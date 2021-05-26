@@ -97,12 +97,13 @@ namespace Cinder {
 
 				auto commandBuffer = m_Renderer->beginFrame();
 				m_Renderer->beginSwapChainRenderPass(commandBuffer);
+
 				renderGameObjects(commandBuffer);
 				//drawIndexed(commandBuffer);
 				m_ImGuiLayer->Begin();
 				m_ImGuiLayer->End(commandBuffer);
-				m_Renderer->endSwapChainRenderPass(commandBuffer);
 
+				m_Renderer->endSwapChainRenderPass(commandBuffer);
 				m_Renderer->endFrame();
 
 			}

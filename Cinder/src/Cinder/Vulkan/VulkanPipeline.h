@@ -3,6 +3,8 @@
 #include "VulkanDevice.h"
 
 #include "Cinder/Core/Base.h"
+#include "Cinder/Renderer/BufferLayout.h"
+
 #include "VulkanVertexBuffer.h"
 #include "VulkanShader.h"
 

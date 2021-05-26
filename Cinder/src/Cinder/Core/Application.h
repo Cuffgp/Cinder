@@ -13,7 +13,6 @@
 
 #include "Cinder/Vulkan/VulkanDevice.h"
 #include "Cinder/Vulkan/VulkanPipeline.h"
-#include "Cinder/Vulkan/VulkanModel.h"
 #include "Cinder/Vulkan/VulkanRenderer.h"
 #include "Cinder/Vulkan/VulkanShader.h"
 

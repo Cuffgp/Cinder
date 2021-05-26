@@ -14,4 +14,6 @@ bin-int/
 **.vcxproj.filters
 **.vcxproj.user
 
+Cinder/vendor/VulkanSDK
+
 premake5.exe

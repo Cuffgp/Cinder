@@ -17,13 +17,13 @@ namespace Cinder {
 		{
 			CN_CORE_ERROR(err);
 		}
-
+		/*
 		CN_CORE_INFO("# of vertices  = {}", (int)(attrib.vertices.size()) / 3);
 		CN_CORE_INFO("# of normals   = {}", (int)(attrib.normals.size()) / 3);
 		CN_CORE_INFO("# of texcoords = {}", (int)(attrib.texcoords.size()) / 2);
 		CN_CORE_INFO("# of materials = {}", (int)materials.size());
 		CN_CORE_INFO("# of shapes    = {}", (int)shapes.size());
-
+		*/
 		std::vector<Vertex> vertices;
 		std::vector<uint32_t> indices;
 

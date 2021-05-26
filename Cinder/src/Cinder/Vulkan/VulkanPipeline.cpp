@@ -10,11 +10,8 @@ namespace Cinder {
 		const PipelineConfigInfo& configInfo)
 	{
 		m_VulkanDevice = Application::Get().GetVulkanDevice();
-		// to do: move this into constructor
-		m_Layout = {
-			{ShaderDataType::Float3, "position"},
-			{ShaderDataType::Float3, "colour"} 
-		};
+		// Get the veryex layout from the shader
+		m_Layout = shader->getVertexBufferLayout();
 		createGraphicsPipeline(shader, configInfo);
 	}
 
