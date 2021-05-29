@@ -4,7 +4,15 @@
 #include "VulkanDevice.h"
 #include "VulkanSwapChain.h"
 
+#include "VulkanUniformBuffer.h"
+
 namespace Cinder {
+
+	struct UniformBufferObject {
+		glm::mat4 model;
+		glm::mat4 view;
+		glm::mat4 proj;
+	};
 
 	class VulkanRenderer
 	{
@@ -19,6 +27,8 @@ namespace Cinder {
 			CN_CORE_ASSERT(isFrameStarted, "Cannot get command buffer when frame not in progress");
 			return commandBuffers[currentFrameIndex];
 		}
+
+		UniformBuffer& getCurrentUniformBuffer() { return uniformBuffers[currentFrameIndex]; }
 
 		int getFrameIndex() const {
 			CN_CORE_ASSERT(isFrameStarted, "Cannot get frame index when frame not in progress");
@@ -43,6 +53,10 @@ namespace Cinder {
 		Ref<VulkanSwapChain> m_SwapChain;
 
 		std::vector<VkCommandBuffer> commandBuffers;
+
+		VkDescriptorPool descriptorPool;
+		std::vector<VkDescriptorSet> descriptorSets;
+		std::vector<UniformBuffer> uniformBuffers;
 
 		uint32_t currentImageIndex;
 		int currentFrameIndex = 0;

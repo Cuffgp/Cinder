@@ -12,6 +12,9 @@ namespace Cinder {
 		m_Device = Application::Get().GetVulkanDevice();
 		recreateSwapChain();
 		createCommandBuffers();
+
+		for (int i = 0; i < VulkanSwapChain::MAX_FRAMES_IN_FLIGHT; i++)
+			uniformBuffers.push_back(UniformBuffer(sizeof(UniformBufferObject)));
 	}
 
 	VulkanRenderer::~VulkanRenderer()

@@ -58,6 +58,7 @@ namespace Cinder {
 		Ref<VulkanDevice> m_Device;
 		Ref<VulkanRenderer> m_Renderer;
 		Ref<Shader> m_Shader;
+		Ref<Shader> m_Shader2;
 		Ref<VulkanPipeline> m_Pipeline;
 
 		Ref<VertexBuffer> m_Vertex;

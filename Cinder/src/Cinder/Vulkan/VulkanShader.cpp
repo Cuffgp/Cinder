@@ -32,9 +32,7 @@ namespace Cinder {
 		auto vertCode = readFile(vertPath);
 		auto fragCode = readFile(fragPath);
 
-		m_Layout = reflection(vertCode);
-
-		CN_CORE_INFO("Vertex Buffer: {}", m_Layout);
+		Reflection(vertCode);
 
 		createShaderModule(vertCode, &m_VertShaderModule);
 		createShaderModule(fragCode, &m_FragShaderModule);
@@ -95,27 +93,47 @@ namespace Cinder {
 			CN_CORE_ERROR("failed to create shader module");
 	}
 
-	VertexBufferLayout Shader::reflection(const std::vector<uint32_t>& code)
+	void Shader::Reflection(const std::vector<uint32_t>& code)
 	{
+		CN_CORE_TRACE("Reflecting Shader");
+
 		spirv_cross::Compiler comp(std::move(code));
+		spirv_cross::ShaderResources resources = comp.get_shader_resources();
 
-		spirv_cross::ShaderResources res = comp.get_shader_resources();
-
+		CN_CORE_TRACE("Vertex Input:");
 		std::vector<VertexBufferElement> vertex_elements;
 
-		for (const spirv_cross::Resource& resource : res.stage_inputs)
+		for (auto input : resources.stage_inputs)
 		{
-			unsigned set = comp.get_decoration(resource.id, spv::DecorationLocation);
-			//unsigned binding = comp.get_decoration(resource.base_type_id, spv::DecorationBinding);
-			const spirv_cross::SPIRType& base_type = comp.get_type(resource.base_type_id);
-			const spirv_cross::SPIRType& type = comp.get_type(resource.type_id);
-			//CN_CORE_INFO("Set {0}, Base_type {1}, Name {2}", set, base_type.basetype, resource.name);
-			//CN_CORE_INFO("Width {0}, Vecsize {1}, Columns {2}", base_type.width, base_type.vecsize, base_type.columns);
+			unsigned set = comp.get_decoration(input.id, spv::DecorationLocation);
+			const spirv_cross::SPIRType& base_type = comp.get_type(input.base_type_id);
+			const spirv_cross::SPIRType& type = comp.get_type(input.type_id);
 
-			vertex_elements.push_back(VertexBufferElement(SpirTypeToShaderType(base_type), resource.name));
+			vertex_elements.push_back(VertexBufferElement(SpirTypeToShaderType(base_type), input.name));
 		}
-		return VertexBufferLayout(vertex_elements);
+		m_Layout = VertexBufferLayout(vertex_elements);
 		
+		CN_CORE_TRACE("Uniform Buffers:");
+
+		for (auto uniform : resources.uniform_buffers)
+		{
+
+		}
+
+		CN_CORE_TRACE("Push Constants:");
+
+		for (auto uniform : resources.push_constant_buffers)
+		{
+
+		}
+
+		CN_CORE_TRACE("Images:");
+
+		for (auto image : resources.sampled_images)
+		{
+
+		}
+
 	}
 
 }

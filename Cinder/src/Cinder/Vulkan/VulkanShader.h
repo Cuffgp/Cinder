@@ -15,7 +15,7 @@ namespace Cinder {
 	private:
 		std::vector<uint32_t> readFile(const std::string& filepath);
 		void createShaderModule(const std::vector<uint32_t>& code, VkShaderModule* shaderModule);
-		VertexBufferLayout reflection(const std::vector<uint32_t>& code);
+		void Reflection(const std::vector<uint32_t>& code);
 	private:
 		VkShaderModule m_VertShaderModule;
 		VkShaderModule m_FragShaderModule;

@@ -7,8 +7,6 @@ namespace Cinder {
 	VertexBuffer::VertexBuffer(void* data, uint32_t size) :
 		m_Size(size)
 	{
-		auto device = Application::Get().GetVulkanDevice();
-
 		VkBufferCreateInfo bufferInfo{};
 		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 		bufferInfo.size = m_Size;

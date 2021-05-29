@@ -147,15 +147,4 @@ namespace Cinder {
 		uint32_t m_Stride = 0;
 	};
 
-	inline std::ostream& operator<<(std::ostream& os, const VertexBufferLayout& layout)
-	{
-		std::stringstream ss;
-		ss << "\nType, Name \n";
-		for (auto element : layout.GetElements())
-		{
-			ss << ShaderDataTypeToString(element.Type) << '\t' << element.Name << '\n';
-		}
-
-		return os << ss.str();
-	}
 }
