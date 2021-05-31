@@ -7,14 +7,13 @@ namespace Cinder {
 
 	VulkanRenderer::VulkanRenderer()
 	{
-		VulkanAllocator::Init();
+		//VulkanAllocator::Init();
 
 		m_Device = Application::Get().GetVulkanDevice();
 		recreateSwapChain();
 		createCommandBuffers();
+		createDescriptorObjects();
 
-		for (int i = 0; i < VulkanSwapChain::MAX_FRAMES_IN_FLIGHT; i++)
-			uniformBuffers.push_back(UniformBuffer(sizeof(UniformBufferObject)));
 	}
 
 	VulkanRenderer::~VulkanRenderer()
@@ -22,30 +21,6 @@ namespace Cinder {
 		VulkanAllocator::Shutdown();
 
 		freeCommandBuffers();
-	}
-
-	void VulkanRenderer::recreateSwapChain()
-	{
-		auto width = Application::Get().GetWindow().GetWidth();
-		auto height = Application::Get().GetWindow().GetHeight();
-
-		VkExtent2D extent = { width, height };
-
-		vkDeviceWaitIdle(m_Device->device());
-
-		if (m_SwapChain == nullptr)
-		{
-			m_SwapChain = CreateScope<VulkanSwapChain>(m_Device, extent);
-		}
-		else
-		{
-			Ref<VulkanSwapChain> oldSwapChain = std::move(m_SwapChain);
-			m_SwapChain = CreateRef<VulkanSwapChain>(m_Device, extent, oldSwapChain);
-			if (!oldSwapChain->compareSwapFormats(*m_SwapChain.get()))
-			{
-				CN_ERROR("Swap chain image(or depth) format has changed!");
-			}
-		}
 	}
 
 	void VulkanRenderer::createCommandBuffers()
@@ -71,6 +46,114 @@ namespace Cinder {
 		commandBuffers.clear();
 	}
 
+	void VulkanRenderer::createDescriptorObjects()
+	{
+		// Uniform Buffers
+		uniformBuffers.resize(VulkanSwapChain::MAX_FRAMES_IN_FLIGHT);
+		for (int i = 0; i < VulkanSwapChain::MAX_FRAMES_IN_FLIGHT; i++)
+			uniformBuffers[i] = CreateRef<UniformBuffer>(sizeof(UniformBufferObject));
+
+		// Descriptor Pool
+		std::array<VkDescriptorPoolSize, 1> poolSizes{};
+		poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		poolSizes[0].descriptorCount = static_cast<uint32_t>(VulkanSwapChain::MAX_FRAMES_IN_FLIGHT);
+		//poolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		//poolSizes[1].descriptorCount = static_cast<uint32_t>(m_SwapChain->imageCount());
+
+		VkDescriptorPoolCreateInfo poolInfo{};
+		poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+		poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
+		poolInfo.pPoolSizes = poolSizes.data();
+		poolInfo.maxSets = static_cast<uint32_t>(VulkanSwapChain::MAX_FRAMES_IN_FLIGHT);
+
+		if (vkCreateDescriptorPool(m_Device->device(), &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS)
+			CN_CORE_ERROR("failed to create descriptor pool!");
+
+		// Descriptor set layout (should come from shader later?)
+		VkDescriptorSetLayoutBinding uboLayoutBinding{};
+		uboLayoutBinding.binding = 0;
+		uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		uboLayoutBinding.descriptorCount = 1;
+		uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+		uboLayoutBinding.pImmutableSamplers = nullptr; // Optional
+
+		std::array<VkDescriptorSetLayoutBinding, 1> bindings = { uboLayoutBinding};
+		VkDescriptorSetLayoutCreateInfo layoutInfo{};
+		layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+		layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
+		layoutInfo.pBindings = bindings.data();
+
+		if (vkCreateDescriptorSetLayout(m_Device->device(), &layoutInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS)
+			CN_CORE_ERROR("failed to create descriptor set layout!");
+
+		// Descriptor sets
+		std::vector<VkDescriptorSetLayout> layouts(VulkanSwapChain::MAX_FRAMES_IN_FLIGHT, descriptorSetLayout);
+
+		VkDescriptorSetAllocateInfo allocInfo{};
+		allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+		allocInfo.descriptorPool = descriptorPool;
+		allocInfo.descriptorSetCount = static_cast<uint32_t>(VulkanSwapChain::MAX_FRAMES_IN_FLIGHT);
+		allocInfo.pSetLayouts = layouts.data();
+
+		descriptorSets.resize(m_SwapChain->imageCount());
+		if (vkAllocateDescriptorSets(m_Device->device(), &allocInfo, descriptorSets.data()) != VK_SUCCESS)
+			CN_CORE_ERROR("failed to allocate descriptor sets!");
+
+		for (size_t i = 0; i < VulkanSwapChain::MAX_FRAMES_IN_FLIGHT; i++)
+		{
+			VkDescriptorBufferInfo bufferInfo{};
+			bufferInfo.buffer = uniformBuffers[i]->GetVulkanBuffer();
+			bufferInfo.offset = 0;
+			bufferInfo.range = sizeof(UniformBufferObject);
+
+			std::array<VkWriteDescriptorSet, 1> descriptorWrites{};
+
+			descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			descriptorWrites[0].dstSet = descriptorSets[i];
+			descriptorWrites[0].dstBinding = 0;
+			descriptorWrites[0].dstArrayElement = 0;
+			descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+			descriptorWrites[0].descriptorCount = 1;
+			descriptorWrites[0].pBufferInfo = &bufferInfo;
+
+			/*
+			descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			descriptorWrites[1].dstSet = descriptorSets[i];
+			descriptorWrites[1].dstBinding = 1;
+			descriptorWrites[1].dstArrayElement = 0;
+			descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+			descriptorWrites[1].descriptorCount = 1;
+			descriptorWrites[1].pImageInfo = &imageInfo;
+			*/
+
+			vkUpdateDescriptorSets(m_Device->device(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
+		}
+
+	}
+
+	void VulkanRenderer::recreateSwapChain()
+	{
+		auto width = Application::Get().GetWindow().GetWidth();
+		auto height = Application::Get().GetWindow().GetHeight();
+
+		VkExtent2D extent = { width, height };
+
+		vkDeviceWaitIdle(m_Device->device());
+
+		if (m_SwapChain == nullptr)
+		{
+			m_SwapChain = CreateScope<VulkanSwapChain>(m_Device, extent);
+		}
+		else
+		{
+			Ref<VulkanSwapChain> oldSwapChain = std::move(m_SwapChain);
+			m_SwapChain = CreateRef<VulkanSwapChain>(m_Device, extent, oldSwapChain);
+			if (!oldSwapChain->compareSwapFormats(*m_SwapChain.get()))
+			{
+				CN_ERROR("Swap chain image(or depth) format has changed!");
+			}
+		}
+	}
 
 	VkCommandBuffer VulkanRenderer::beginFrame() {
 		CN_CORE_ASSERT(!isFrameStarted, "Can't call beginFrame while already in progress");

@@ -1,5 +1,6 @@
 #include "cnpch.h"
 #include "Cinder/Core/Application.h"
+#include "Cinder/Vulkan/VulkanAllocator.h"
 
 #include "GLFW/glfw3.h"
 
@@ -22,6 +23,9 @@ namespace Cinder {
 		m_Window->Maximize();
 
 		m_Device = CreateRef<VulkanDevice>(m_Window->GetNativeWindow());
+
+		VulkanAllocator::Init();
+
 		m_Renderer = CreateRef<VulkanRenderer>();
 		m_Shader = CreateRef<Shader>("assets/shaders/shader.vert.spv", "assets/shaders/shader.frag.spv");
 		m_Shader2 = CreateRef<Shader>("assets/shaders/UniformTexture.vert.spv", "assets/shaders/UniformTexture.frag.spv");

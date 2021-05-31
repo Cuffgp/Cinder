@@ -6,6 +6,8 @@
 
 #include "VulkanUniformBuffer.h"
 
+#include <glm/glm.hpp>
+
 namespace Cinder {
 
 	struct UniformBufferObject {
@@ -28,7 +30,7 @@ namespace Cinder {
 			return commandBuffers[currentFrameIndex];
 		}
 
-		UniformBuffer& getCurrentUniformBuffer() { return uniformBuffers[currentFrameIndex]; }
+		Ref<UniformBuffer> getCurrentUniformBuffer() { return uniformBuffers[currentFrameIndex]; }
 
 		int getFrameIndex() const {
 			CN_CORE_ASSERT(isFrameStarted, "Cannot get frame index when frame not in progress");
@@ -47,6 +49,7 @@ namespace Cinder {
 	private:
 		void createCommandBuffers();
 		void freeCommandBuffers();
+		void createDescriptorObjects();
 		void recreateSwapChain();
 
 		Ref<VulkanDevice> m_Device;
@@ -54,9 +57,10 @@ namespace Cinder {
 
 		std::vector<VkCommandBuffer> commandBuffers;
 
+		std::vector<Ref<UniformBuffer>> uniformBuffers;
 		VkDescriptorPool descriptorPool;
+		VkDescriptorSetLayout descriptorSetLayout;
 		std::vector<VkDescriptorSet> descriptorSets;
-		std::vector<UniformBuffer> uniformBuffers;
 
 		uint32_t currentImageIndex;
 		int currentFrameIndex = 0;

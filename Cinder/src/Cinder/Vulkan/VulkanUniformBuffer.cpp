@@ -3,8 +3,10 @@
 
 namespace Cinder {
 
-	UniformBuffer::UniformBuffer(uint32_t size)
+	UniformBuffer::UniformBuffer(uint32_t size):
+		m_Size(size)
 	{
+		CN_CORE_INFO("Creating Uniform Buffer, size {}", size);
 		VkBufferCreateInfo bufferInfo{};
 		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 		bufferInfo.size = m_Size;

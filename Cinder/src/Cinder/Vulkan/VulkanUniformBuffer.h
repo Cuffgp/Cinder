@@ -13,6 +13,8 @@ namespace Cinder {
 	public:
 		UniformBuffer(uint32_t size);
 		~UniformBuffer();
+
+		VkBuffer GetVulkanBuffer() { return m_VulkanBuffer; }
 		void SetData(void* data, uint32_t size);
 	private:
 		uint32_t m_Size = 0;

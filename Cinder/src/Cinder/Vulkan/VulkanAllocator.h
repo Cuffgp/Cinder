@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Cinder/Core/Base.h"
+
 #include "Vulkan.h"
 #include "vk_mem_alloc.h"
 
