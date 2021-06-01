@@ -65,6 +65,7 @@ namespace Cinder {
 		Ref<IndexBuffer> m_Index;
 
 		Ref<Model> m_Model;
+		UniformBufferObject m_UBO;
 
 		VkPipelineLayout pipelineLayout;
 
@@ -72,6 +73,7 @@ namespace Cinder {
 		void createPipeline(VkRenderPass renderPass);
 
 		void renderGameObjects(VkCommandBuffer commandBuffer);
+		void updateUniformBuffer();
 
 		void drawIndexed(VkCommandBuffer commandBuffer);
 	};

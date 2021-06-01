@@ -247,8 +247,19 @@ namespace Cinder {
 		vkCmdEndRenderPass(commandBuffer);
 	}
 
+	void VulkanRenderer::updateUniformBuffer(UniformBufferObject ubo)
+	{
+		auto uniformBuffer = uniformBuffers[currentFrameIndex];
+		uniformBuffer->SetData(&ubo, sizeof(UniformBufferObject));
+	}
+
 	void VulkanRenderer::OnWindowResize(uint32_t width, uint32_t height)
 	{
 		//recreateSwapChain();
+	}
+
+	void VulkanRenderer::bindDescriptorSet(VkPipelineLayout layout)
+	{
+		vkCmdBindDescriptorSets(commandBuffers[currentFrameIndex], VK_PIPELINE_BIND_POINT_GRAPHICS, layout, 0, 1, &descriptorSets[currentFrameIndex], 0, nullptr);
 	}
 }

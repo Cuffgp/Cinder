@@ -8,6 +8,7 @@
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
+#include <glm/ext.hpp>
 
 namespace Cinder {
 
@@ -27,7 +28,7 @@ namespace Cinder {
 		VulkanAllocator::Init();
 
 		m_Renderer = CreateRef<VulkanRenderer>();
-		m_Shader = CreateRef<Shader>("assets/shaders/shader.vert.spv", "assets/shaders/shader.frag.spv");
+		m_Shader = CreateRef<Shader>("assets/shaders/Uniform.vert.spv", "assets/shaders/Uniform.frag.spv");
 		m_Shader2 = CreateRef<Shader>("assets/shaders/UniformTexture.vert.spv", "assets/shaders/UniformTexture.frag.spv");
 
 		m_Model = CreateRef<Model>("assets/objects/Spot.obj");
@@ -103,6 +104,7 @@ namespace Cinder {
 				auto commandBuffer = m_Renderer->beginFrame();
 				m_Renderer->beginSwapChainRenderPass(commandBuffer);
 
+				updateUniformBuffer();
 				renderGameObjects(commandBuffer);
 				//drawIndexed(commandBuffer);
 				m_ImGuiLayer->Begin();
@@ -145,8 +147,10 @@ namespace Cinder {
 
 		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		pipelineLayoutInfo.setLayoutCount = 0;
-		pipelineLayoutInfo.pSetLayouts = nullptr;
+		pipelineLayoutInfo.setLayoutCount = 1;
+		pipelineLayoutInfo.pSetLayouts = &m_Renderer->getDescriptorLayout();
+		//pipelineLayoutInfo.setLayoutCount = 0;
+		//pipelineLayoutInfo.pSetLayouts = nullptr;
 		//pipelineLayoutInfo.pushConstantRangeCount = 1;
 		//pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
 		pipelineLayoutInfo.pushConstantRangeCount = 0;
@@ -173,6 +177,7 @@ namespace Cinder {
 	void Application::renderGameObjects(VkCommandBuffer commandBuffer)
 	{
 		m_Pipeline->bind(commandBuffer);
+		m_Renderer->bindDescriptorSet(pipelineLayout);
 		m_Model->bind(commandBuffer);
 		m_Model->draw(commandBuffer);
 	}
@@ -188,6 +193,22 @@ namespace Cinder {
 
 		vkCmdDrawIndexed(commandBuffer, m_Index->GetIndexCount(), 1, 0, 0, 0);
 
+	}
+
+	void Application::updateUniformBuffer()
+	{
+		static auto startTime = std::chrono::high_resolution_clock::now();
+
+		auto currentTime = std::chrono::high_resolution_clock::now();
+		float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+
+		UniformBufferObject ubo{};
+		ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		ubo.view = glm::lookAt(glm::vec3(3.0f, 3.0f, 3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		ubo.proj = glm::perspective(glm::radians(45.0f), (float)m_Window->GetWidth() / (float)m_Window->GetHeight(), 0.1f, 10.0f);
+		ubo.proj[1][1] *= -1;
+
+		m_Renderer->updateUniformBuffer(ubo);
 	}
 
 	

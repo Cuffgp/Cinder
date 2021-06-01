@@ -30,7 +30,7 @@ namespace Cinder {
 			return commandBuffers[currentFrameIndex];
 		}
 
-		Ref<UniformBuffer> getCurrentUniformBuffer() { return uniformBuffers[currentFrameIndex]; }
+		void updateUniformBuffer(UniformBufferObject ubo);
 
 		int getFrameIndex() const {
 			CN_CORE_ASSERT(isFrameStarted, "Cannot get frame index when frame not in progress");
@@ -46,6 +46,8 @@ namespace Cinder {
 
 		Ref<VulkanSwapChain> getSwapChain() { return m_SwapChain; }
 		Ref<VulkanDevice> getDevice() { return m_Device; }
+		VkDescriptorSetLayout& const getDescriptorLayout() { return descriptorSetLayout; }
+		void bindDescriptorSet(VkPipelineLayout layout);
 	private:
 		void createCommandBuffers();
 		void freeCommandBuffers();
