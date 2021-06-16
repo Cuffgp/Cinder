@@ -19,7 +19,10 @@ namespace Cinder {
 	private:
 		VkShaderModule m_VertShaderModule;
 		VkShaderModule m_FragShaderModule;
+		std::map<VkShaderStageFlagBits, std::vector<uint32_t>> shader_stage;
 		std::vector<VkPipelineShaderStageCreateInfo> m_ShaderStages;
 		VertexBufferLayout m_Layout;
+
+		VkShaderStageFlagBits stage;
 	};
 }

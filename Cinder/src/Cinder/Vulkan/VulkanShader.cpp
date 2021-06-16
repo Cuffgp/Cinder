@@ -32,10 +32,11 @@ namespace Cinder {
 		auto vertCode = readFile(vertPath);
 		auto fragCode = readFile(fragPath);
 
-		Reflection(vertCode);
-
 		createShaderModule(vertCode, &m_VertShaderModule);
 		createShaderModule(fragCode, &m_FragShaderModule);
+
+		//Reflection(vertCode);
+		//Reflection(fragCode);
 
 		m_ShaderStages.resize(2);
 
@@ -95,16 +96,18 @@ namespace Cinder {
 
 	void Shader::Reflection(const std::vector<uint32_t>& code)
 	{
-		CN_CORE_TRACE("Reflecting Shader");
+		CN_CORE_INFO("Reflecting Shader");
 
 		spirv_cross::Compiler comp(std::move(code));
 		spirv_cross::ShaderResources resources = comp.get_shader_resources();
 
+		/*
 		CN_CORE_TRACE("Vertex Input:");
 		std::vector<VertexBufferElement> vertex_elements;
 
 		for (auto input : resources.stage_inputs)
 		{
+			CN_CORE_TRACE("Name: {}", input.name);
 			unsigned set = comp.get_decoration(input.id, spv::DecorationLocation);
 			const spirv_cross::SPIRType& base_type = comp.get_type(input.base_type_id);
 			const spirv_cross::SPIRType& type = comp.get_type(input.type_id);
@@ -112,26 +115,30 @@ namespace Cinder {
 			vertex_elements.push_back(VertexBufferElement(SpirTypeToShaderType(base_type), input.name));
 		}
 		m_Layout = VertexBufferLayout(vertex_elements);
+		*/
 		
 		CN_CORE_TRACE("Uniform Buffers:");
 
 		for (auto uniform : resources.uniform_buffers)
 		{
-
+			CN_CORE_TRACE("Name: {}", uniform.name);
 		}
 
 		CN_CORE_TRACE("Push Constants:");
 
-		for (auto uniform : resources.push_constant_buffers)
+		for (auto push_constant : resources.push_constant_buffers)
 		{
-
+			CN_CORE_TRACE("Name: {}", push_constant.name);
 		}
 
 		CN_CORE_TRACE("Images:");
 
 		for (auto image : resources.sampled_images)
 		{
-
+			CN_CORE_TRACE("Name: {}", image.name);
+			unsigned set = comp.get_decoration(image.id, spv::DecorationDescriptorSet);
+			unsigned binding = comp.get_decoration(image.id, spv::DecorationBinding);
+			CN_CORE_TRACE("Set {1}, binding {2}", set, binding);
 		}
 
 	}

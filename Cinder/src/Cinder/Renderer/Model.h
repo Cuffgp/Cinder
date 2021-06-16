@@ -13,6 +13,7 @@ namespace Cinder {
 		{
 			glm::vec3 position;
 			glm::vec3 color;
+			glm::vec2 texCoord;
 		};
 
 		Model(const std::string& objFilepath);

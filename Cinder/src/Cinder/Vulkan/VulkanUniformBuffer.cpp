@@ -13,7 +13,7 @@ namespace Cinder {
 		bufferInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
 		//bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-		m_Allocation = VulkanAllocator::AllocateBuffer(bufferInfo, m_VulkanBuffer);
+		m_Allocation = VulkanAllocator::AllocateBuffer(bufferInfo, VMA_MEMORY_USAGE_CPU_TO_GPU, m_VulkanBuffer);
 	}
 
 	UniformBuffer::~UniformBuffer()

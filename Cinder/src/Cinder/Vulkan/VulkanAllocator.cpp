@@ -24,20 +24,20 @@ namespace Cinder {
 		vmaDestroyAllocator(s_Allocator);
 	}
 
-	VmaAllocation VulkanAllocator::AllocateBuffer(VkBufferCreateInfo bufferCreateInfo, VkBuffer& outBuffer)
+	VmaAllocation VulkanAllocator::AllocateBuffer(VkBufferCreateInfo bufferCreateInfo, VmaMemoryUsage usage, VkBuffer& outBuffer)
 	{
 		VmaAllocationCreateInfo allocCreateInfo = {};
-		allocCreateInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
+		allocCreateInfo.usage = usage;
 
 		VmaAllocation allocation;
 		VulkanCheckResult(vmaCreateBuffer(s_Allocator, &bufferCreateInfo, &allocCreateInfo, &outBuffer, &allocation, nullptr));
 		return allocation;
 	}
 
-	VmaAllocation VulkanAllocator::AllocateImage(VkImageCreateInfo imageCreateInfo, VkImage& outImage)
+	VmaAllocation VulkanAllocator::AllocateImage(VkImageCreateInfo imageCreateInfo, VmaMemoryUsage usage, VkImage& outImage)
 	{
 		VmaAllocationCreateInfo allocCreateInfo = {};
-		allocCreateInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
+		allocCreateInfo.usage = usage;
 
 		VmaAllocation allocation;
 		vmaCreateImage(s_Allocator, &imageCreateInfo, &allocCreateInfo, &outImage, &allocation, nullptr);

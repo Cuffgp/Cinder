@@ -5,6 +5,7 @@
 #include "VulkanSwapChain.h"
 
 #include "VulkanUniformBuffer.h"
+#include "VulkanTexture.h"
 
 #include <glm/glm.hpp>
 
@@ -48,10 +49,10 @@ namespace Cinder {
 		Ref<VulkanDevice> getDevice() { return m_Device; }
 		VkDescriptorSetLayout& const getDescriptorLayout() { return descriptorSetLayout; }
 		void bindDescriptorSet(VkPipelineLayout layout);
+		void createDescriptorObjects(Ref<Texture> texture);
 	private:
 		void createCommandBuffers();
 		void freeCommandBuffers();
-		void createDescriptorObjects();
 		void recreateSwapChain();
 
 		Ref<VulkanDevice> m_Device;

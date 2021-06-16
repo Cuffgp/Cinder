@@ -13,8 +13,8 @@ namespace Cinder {
 		static void Init();
 		static void Shutdown();
 
-		static VmaAllocation AllocateBuffer(VkBufferCreateInfo bufferCreateInfo, VkBuffer& outBuffer);
-		static VmaAllocation AllocateImage(VkImageCreateInfo imageCreateInfo, VkImage& outImage);
+		static VmaAllocation AllocateBuffer(VkBufferCreateInfo bufferCreateInfo, VmaMemoryUsage usage, VkBuffer& outBuffer);
+		static VmaAllocation AllocateImage(VkImageCreateInfo imageCreateInfo, VmaMemoryUsage usage, VkImage& outImage);
 		static void DestroyBuffer(VkBuffer buffer, VmaAllocation allocation);
 		static void DestroyImage(VkImage image, VmaAllocation allocation);
 		static void* MapMemory(VmaAllocation allocation);

@@ -14,7 +14,7 @@ namespace Cinder {
 		//bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
 		m_LocalData = Buffer::Copy(data, size);
-		m_Allocation = VulkanAllocator::AllocateBuffer(bufferInfo, m_VulkanBuffer);
+		m_Allocation = VulkanAllocator::AllocateBuffer(bufferInfo, VMA_MEMORY_USAGE_CPU_TO_GPU, m_VulkanBuffer);
 
 		void* dst = VulkanAllocator::MapMemory(m_Allocation);
 		memcpy(dst, m_LocalData.Data, m_Size);

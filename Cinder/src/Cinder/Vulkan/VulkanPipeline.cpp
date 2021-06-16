@@ -11,7 +11,11 @@ namespace Cinder {
 	{
 		m_VulkanDevice = Application::Get().GetVulkanDevice();
 		// Get the veryex layout from the shader
-		m_Layout = shader->getVertexBufferLayout();
+		//m_Layout = shader->getVertexBufferLayout();
+		m_Layout = { 
+					{ShaderDataType::Float3, "position"},
+					{ShaderDataType::Float3, "colour"},
+					{ShaderDataType::Float2, "texCoord"} };
 		createGraphicsPipeline(shader, configInfo);
 	}
 

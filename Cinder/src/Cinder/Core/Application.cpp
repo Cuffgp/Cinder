@@ -24,20 +24,7 @@ namespace Cinder {
 		m_Window->Maximize();
 
 		m_Device = CreateRef<VulkanDevice>(m_Window->GetNativeWindow());
-
 		VulkanAllocator::Init();
-
-		m_Renderer = CreateRef<VulkanRenderer>();
-		m_Shader = CreateRef<Shader>("assets/shaders/Uniform.vert.spv", "assets/shaders/Uniform.frag.spv");
-		m_Shader2 = CreateRef<Shader>("assets/shaders/UniformTexture.vert.spv", "assets/shaders/UniformTexture.frag.spv");
-
-		m_Model = CreateRef<Model>("assets/objects/Spot.obj");
-
-		createPipelineLayout();
-		createPipeline(m_Renderer->getSwapChainRenderPass());
-
-		m_ImGuiLayer = new ImGuiLayer(m_Renderer, m_Window);
-		PushOverlay(m_ImGuiLayer);
 
 		float vertexData[] = {
 			-0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
@@ -50,8 +37,24 @@ namespace Cinder {
 			0, 1, 2, 2, 3, 0
 		};
 
+		m_Model = CreateRef<Model>("assets/objects/Spot.obj");
+
 		m_Vertex = CreateRef<VertexBuffer>(vertexData, sizeof(vertexData));
 		m_Index = CreateRef<IndexBuffer>(indexData, sizeof(indexData));
+		m_Texture = CreateRef<Texture>("assets/textures/spot_texture.png");
+
+		m_Renderer = CreateRef<VulkanRenderer>();
+		m_Renderer->createDescriptorObjects(m_Texture);
+		//m_Shader = CreateRef<Shader>("assets/shaders/Uniform.vert.spv", "assets/shaders/Uniform.frag.spv");
+		m_Shader = CreateRef<Shader>("assets/shaders/UniformTexture.vert.spv", "assets/shaders/UniformTexture.frag.spv");
+
+
+		createPipelineLayout();
+		createPipeline(m_Renderer->getSwapChainRenderPass());
+
+		m_ImGuiLayer = new ImGuiLayer(m_Renderer, m_Window);
+		PushOverlay(m_ImGuiLayer);
+
 
 	}
 
