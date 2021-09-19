@@ -8,6 +8,7 @@ namespace Cinder {
 	class Texture
 	{
 	public:
+		Texture(void* data, uint32_t width, uint32_t height);
 		Texture(const std::string& texFilepath);
 		~Texture();
 
@@ -17,6 +18,7 @@ namespace Cinder {
 	private:
 
 		void createTexture(const std::string& texFilepath);
+		void createTexture(void* data, uint32_t width, uint32_t height);
 		void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
 		void createTextureImageView();
 		void createTextureSampler();

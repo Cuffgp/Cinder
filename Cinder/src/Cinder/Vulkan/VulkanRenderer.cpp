@@ -166,7 +166,8 @@ namespace Cinder {
 		}
 	}
 
-	VkCommandBuffer VulkanRenderer::beginFrame() {
+	VkCommandBuffer VulkanRenderer::beginFrame() 
+	{
 		CN_CORE_ASSERT(!isFrameStarted, "Can't call beginFrame while already in progress");
 
 		auto result = m_SwapChain->acquireNextImage(&currentImageIndex);
@@ -195,7 +196,8 @@ namespace Cinder {
 		return commandBuffer;
 	}
 
-	void VulkanRenderer::endFrame() {
+	void VulkanRenderer::endFrame() 
+	{
 		CN_CORE_ASSERT(isFrameStarted, "Can't call endFrame while frame is not in progress");
 		auto commandBuffer = getCurrentCommandBuffer();
 		if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
@@ -216,7 +218,8 @@ namespace Cinder {
 		currentFrameIndex = (currentFrameIndex + 1) % VulkanSwapChain::MAX_FRAMES_IN_FLIGHT;
 	}
 
-	void VulkanRenderer::beginSwapChainRenderPass(VkCommandBuffer commandBuffer) {
+	void VulkanRenderer::beginSwapChainRenderPass(VkCommandBuffer commandBuffer) 
+	{
 		CN_CORE_ASSERT(isFrameStarted, "Can't call beginSwapChainRenderPass if frame is not in progress");
 		CN_CORE_ASSERT(
 			commandBuffer == getCurrentCommandBuffer(),
@@ -250,7 +253,8 @@ namespace Cinder {
 		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 	}
 
-	void VulkanRenderer::endSwapChainRenderPass(VkCommandBuffer commandBuffer) {
+	void VulkanRenderer::endSwapChainRenderPass(VkCommandBuffer commandBuffer) 
+	{
 		CN_CORE_ASSERT(isFrameStarted, "Can't call endSwapChainRenderPass if frame is not in progress");
 		CN_CORE_ASSERT(
 			commandBuffer == getCurrentCommandBuffer(),

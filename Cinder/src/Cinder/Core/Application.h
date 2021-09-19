@@ -21,6 +21,7 @@
 #include "Cinder/Vulkan/VulkanTexture.h"
 
 #include "Cinder/Renderer/Model.h"
+#include "Cinder/Renderer/Camera.h"
 
 namespace Cinder {
 
@@ -65,8 +66,10 @@ namespace Cinder {
 		Ref<VertexBuffer> m_Vertex;
 		Ref<IndexBuffer> m_Index;
 		Ref<Texture> m_Texture;
+		Ref<Texture> m_WhiteTexture;
 
 		Ref<Model> m_Model;
+		Ref<Camera> m_Camera;
 		UniformBufferObject m_UBO;
 
 		VkPipelineLayout pipelineLayout;

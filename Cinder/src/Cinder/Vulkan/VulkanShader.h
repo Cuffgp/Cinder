@@ -15,14 +15,12 @@ namespace Cinder {
 	private:
 		std::vector<uint32_t> readFile(const std::string& filepath);
 		void createShaderModule(const std::vector<uint32_t>& code, VkShaderModule* shaderModule);
-		void Reflection(const std::vector<uint32_t>& code);
+		void Reflection(const std::vector<uint32_t>& code, VkShaderStageFlagBits stage);
 	private:
 		VkShaderModule m_VertShaderModule;
 		VkShaderModule m_FragShaderModule;
-		std::map<VkShaderStageFlagBits, std::vector<uint32_t>> shader_stage;
+
 		std::vector<VkPipelineShaderStageCreateInfo> m_ShaderStages;
 		VertexBufferLayout m_Layout;
-
-		VkShaderStageFlagBits stage;
 	};
 }

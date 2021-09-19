@@ -2,19 +2,26 @@
 
 #include <glm/glm.hpp>
 
+#undef near
+#undef far
+
 namespace Cinder {
 
 	class Camera
 	{
 	public:
-		Camera(float width, float height);
-		~Camera();
-	private:
-		glm::vec3 position;
-		glm::vec3 direction;
+		void SetOrthographicProjection(float left, float right, float top, float bottom, float near, float far);
+		void SetPerspectiveProjection(float fovy, float aspect, float near, float far);
 
-		glm::mat4 view;
-		glm::mat4 projection;
+		void SetViewDirection(glm::vec3 position, glm::vec3 direction, glm::vec3 up = glm::vec3{ 0.f, -1.f, 0.f });
+		void SetViewTarget(glm::vec3 position, glm::vec3 target, glm::vec3 up = glm::vec3{ 0.f, -1.f, 0.f });
+		void SetViewYXZ(glm::vec3 position, glm::vec3 rotation);
+
+		const glm::mat4& GetView() const { return viewMatrix; }
+		const glm::mat4& GetProjection() const { return projectionMatrix; }
+	private:
+		glm::mat4 viewMatrix{1.0f};
+		glm::mat4 projectionMatrix{1.0f};
 	};
 
 }

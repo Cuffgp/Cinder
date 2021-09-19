@@ -8,6 +8,13 @@
 
 namespace Cinder {
 
+	Texture::Texture(void* data, uint32_t width, uint32_t height)
+	{
+		createTexture(data, width, height);
+		createTextureImageView();
+		createTextureSampler();
+	}
+
 	Texture::Texture(const std::string& texFilepath)
 	{
 		createTexture(texFilepath);
@@ -68,6 +75,51 @@ namespace Cinder {
 
 		transitionImageLayout(m_Image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 		device->copyBufferToImage(stagingBuffer, m_Image, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight), 1);
+		transitionImageLayout(m_Image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+		VulkanAllocator::DestroyBuffer(stagingBuffer, stagingAllocation);
+	}
+
+	void Texture::createTexture(void* data, uint32_t width, uint32_t height)
+	{
+		auto device = Application::Get().GetVulkanDevice();
+		uint32_t size = width * height * 4;
+
+		VkBuffer stagingBuffer;
+		VmaAllocation stagingAllocation;
+
+		VkBufferCreateInfo stagingBufferInfo{};
+		stagingBufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+		stagingBufferInfo.size = size;
+		stagingBufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+		stagingBufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+		stagingAllocation = VulkanAllocator::AllocateBuffer(stagingBufferInfo, VmaMemoryUsage::VMA_MEMORY_USAGE_CPU_TO_GPU, stagingBuffer);
+
+		void* dst = VulkanAllocator::MapMemory(stagingAllocation);
+		memcpy(dst, data, size);
+		VulkanAllocator::UnmapMemory(stagingAllocation);
+
+		VkImageCreateInfo imageInfo{};
+		imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+		imageInfo.imageType = VK_IMAGE_TYPE_2D;
+		imageInfo.extent.width = width;
+		imageInfo.extent.height = height;
+		imageInfo.extent.depth = 1;
+		imageInfo.mipLevels = 1;
+		imageInfo.arrayLayers = 1;
+		imageInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
+		imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+		imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		imageInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+		imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+		imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+		imageInfo.flags = 0; // Optional
+
+		m_ImageAllocation = VulkanAllocator::AllocateImage(imageInfo, VMA_MEMORY_USAGE_GPU_ONLY, m_Image);
+
+		transitionImageLayout(m_Image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+		device->copyBufferToImage(stagingBuffer, m_Image, width, height, 1);
 		transitionImageLayout(m_Image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 		VulkanAllocator::DestroyBuffer(stagingBuffer, stagingAllocation);

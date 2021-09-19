@@ -35,8 +35,8 @@ namespace Cinder {
 		createShaderModule(vertCode, &m_VertShaderModule);
 		createShaderModule(fragCode, &m_FragShaderModule);
 
-		//Reflection(vertCode);
-		//Reflection(fragCode);
+		//Reflection(vertCode, VK_SHADER_STAGE_VERTEX_BIT);
+		//Reflection(fragCode, VK_SHADER_STAGE_FRAGMENT_BIT);
 
 		m_ShaderStages.resize(2);
 
@@ -94,28 +94,29 @@ namespace Cinder {
 			CN_CORE_ERROR("failed to create shader module");
 	}
 
-	void Shader::Reflection(const std::vector<uint32_t>& code)
+	void Shader::Reflection(const std::vector<uint32_t>& code, VkShaderStageFlagBits stage)
 	{
 		CN_CORE_INFO("Reflecting Shader");
 
 		spirv_cross::Compiler comp(std::move(code));
 		spirv_cross::ShaderResources resources = comp.get_shader_resources();
 
-		/*
-		CN_CORE_TRACE("Vertex Input:");
-		std::vector<VertexBufferElement> vertex_elements;
-
-		for (auto input : resources.stage_inputs)
+		if (stage & VK_SHADER_STAGE_VERTEX_BIT)
 		{
-			CN_CORE_TRACE("Name: {}", input.name);
-			unsigned set = comp.get_decoration(input.id, spv::DecorationLocation);
-			const spirv_cross::SPIRType& base_type = comp.get_type(input.base_type_id);
-			const spirv_cross::SPIRType& type = comp.get_type(input.type_id);
+			CN_CORE_TRACE("Vertex Input:");
+			std::vector<VertexBufferElement> vertex_elements;
 
-			vertex_elements.push_back(VertexBufferElement(SpirTypeToShaderType(base_type), input.name));
+			for (auto input : resources.stage_inputs)
+			{
+				CN_CORE_TRACE("Name: {}", input.name);
+				unsigned set = comp.get_decoration(input.id, spv::DecorationLocation);
+				const spirv_cross::SPIRType& base_type = comp.get_type(input.base_type_id);
+				const spirv_cross::SPIRType& type = comp.get_type(input.type_id);
+
+				vertex_elements.push_back(VertexBufferElement(SpirTypeToShaderType(base_type), input.name));
+			}
+			m_Layout = VertexBufferLayout(vertex_elements);
 		}
-		m_Layout = VertexBufferLayout(vertex_elements);
-		*/
 		
 		CN_CORE_TRACE("Uniform Buffers:");
 
@@ -138,7 +139,7 @@ namespace Cinder {
 			CN_CORE_TRACE("Name: {}", image.name);
 			unsigned set = comp.get_decoration(image.id, spv::DecorationDescriptorSet);
 			unsigned binding = comp.get_decoration(image.id, spv::DecorationBinding);
-			CN_CORE_TRACE("Set {1}, binding {2}", set, binding);
+			CN_CORE_TRACE("Set {0}, binding {1}", set, binding);
 		}
 
 	}

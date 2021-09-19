@@ -31,6 +31,7 @@ namespace Cinder {
 
 		unsigned int GetWidth() const { return m_Data.Width; }
 		unsigned int GetHeight() const { return m_Data.Height; }
+		float GetAspect() const { return (float)m_Data.Width / (float)m_Data.Height; }
 		void Maximize() { glfwMaximizeWindow(m_Window); }
 
 		// Window attributes

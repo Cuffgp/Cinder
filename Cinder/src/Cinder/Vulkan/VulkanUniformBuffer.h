@@ -5,7 +5,6 @@
 #include "Vulkan.h"
 #include "VulkanAllocator.h"
 
-
 namespace Cinder {
 
 	class UniformBuffer

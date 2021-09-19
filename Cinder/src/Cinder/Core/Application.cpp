@@ -9,6 +9,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
 #include <glm/ext.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 namespace Cinder {
 
@@ -37,14 +38,20 @@ namespace Cinder {
 			0, 1, 2, 2, 3, 0
 		};
 
-		m_Model = CreateRef<Model>("assets/objects/Spot.obj");
+		char whiteTexData[] = { 255, 255, 255, 255 };
+
+		m_Model = CreateRef<Model>("assets/objects/flat_vase.obj");
+		m_Camera = CreateRef<Camera>();
+		m_Camera->SetPerspectiveProjection(glm::radians(45.0f), m_Window->GetAspect(), 0.1f, 10.0f);
+		m_Camera->SetViewTarget(glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.0f, 0.0f, 0.0f));
 
 		m_Vertex = CreateRef<VertexBuffer>(vertexData, sizeof(vertexData));
 		m_Index = CreateRef<IndexBuffer>(indexData, sizeof(indexData));
 		m_Texture = CreateRef<Texture>("assets/textures/spot_texture.png");
+		m_WhiteTexture = CreateRef<Texture>(whiteTexData, 1, 1);
 
 		m_Renderer = CreateRef<VulkanRenderer>();
-		m_Renderer->createDescriptorObjects(m_Texture);
+		m_Renderer->createDescriptorObjects(m_WhiteTexture);
 		//m_Shader = CreateRef<Shader>("assets/shaders/Uniform.vert.spv", "assets/shaders/Uniform.frag.spv");
 		m_Shader = CreateRef<Shader>("assets/shaders/UniformTexture.vert.spv", "assets/shaders/UniformTexture.frag.spv");
 
@@ -206,10 +213,13 @@ namespace Cinder {
 		float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
 		UniformBufferObject ubo{};
-		ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		ubo.view = glm::lookAt(glm::vec3(3.0f, 3.0f, 3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		ubo.proj = glm::perspective(glm::radians(45.0f), (float)m_Window->GetWidth() / (float)m_Window->GetHeight(), 0.1f, 10.0f);
-		ubo.proj[1][1] *= -1;
+		//ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		//ubo.view = glm::lookAt(glm::vec3(3.0f, 3.0f, 3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f));
+		//ubo.proj = glm::perspective(glm::radians(45.0f), m_Window->GetAspect(), 0.1f, 10.0f);
+
+		ubo.model = glm::mat4(1.0f);
+		ubo.view = m_Camera->GetView();
+		ubo.proj = m_Camera->GetProjection();
 
 		m_Renderer->updateUniformBuffer(ubo);
 	}
